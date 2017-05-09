@@ -1,0 +1,31 @@
+{
+  "name": "e2e-tests",
+  "version": "0.0.1",
+  "description": "Aiden bot end-to-end tests",
+  "main": "built/index.js",
+  "types": "built/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "npm-run-all -p -r -l tsc-watch",
+    "tsc-watch": "tsc -w",
+    "clean": "rm -rf built"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://git@github.com/aiden/e2e-tests.git"
+  },
+  "author": "Dashbot Ltd",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@types/node": "^7.0.18",
+    "botframework-directlinejs": "^0.9.7"
+  },
+  "devDependencies": {
+    "npm-run-all": "^3.1.2",
+    "source-map-loader": "^0.1.5",
+    "ts-loader": "^1.3.3",
+    "typescript": "^2.3.2",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0"
+  }
+}
