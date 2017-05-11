@@ -1,0 +1,14 @@
+[
+  {
+    "in": "Hi!",
+    "out": "Hey, how are you!"
+  },
+  {
+    "in": "Hi!",
+    "out": [
+      "Hey, how are you!",
+      "What's up!",
+      "Hey!"
+    ]
+  }
+]

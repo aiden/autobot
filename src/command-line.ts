@@ -4,25 +4,25 @@ import * as utils from "./utils";
 
 // Command Line
 const minimistOpts: minimist.Opts = {
-    string: ['conversation'],
-    alias: { 'c': ['conversation'] },
+    string: ['chat-path'],
+    alias: { 'c': ['chat-path'] },
 };
 
 var argv: {
-    conversation?: string;
+    chat_path?: string;
     _?: string[];
 } = minimist(process.argv.slice(2), minimistOpts);
 
 interface CommandLineOptions {
-    conversation: string;
+    chat_path: string;
 }
 
 export let getOptions = utils.once((): CommandLineOptions => {
     let options: CommandLineOptions = {
-        conversation: argv.conversation,
+        chat_path: argv.chat_path,
     }
-    if (typeof options.conversation !== 'string') {
-        options.conversation = null;
+    if (typeof options.chat_path !== 'string') {
+        options.chat_path = null;
     }
     return options;
 });

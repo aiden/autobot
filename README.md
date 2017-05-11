@@ -37,17 +37,17 @@ $ npm run build
 ]
 ```
 
-### Specifying a chat file
+### Specifying a chat file or directory
 
 * To run a single chat file, specify the file e.g. `./chats/onboarding.json` to run 1 chat file.
 * To run multiple files, specify a directory e.g. `./chats`
 
 ```
-$ env DIRECT_LINE_SECRET=<direct-line-secret>node built/e2e.js --chat-file ./chats/onboarding.json
+$ env DIRECT_LINE_SECRET=<direct-line-secret>node built/e2e.js --chat-path ./chats/onboarding.json
 
 OR
 
-$ env DIRECT_LINE_SECRET=<direct-line-secret>node built/e2e.js --chat-file ./chats
+$ env DIRECT_LINE_SECRET=<direct-line-secret>node built/e2e.js --chat-path ./chats
 ```
 
 Alternatively, use `-c`.
