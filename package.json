@@ -17,6 +17,7 @@
   "author": "Dashbot Ltd",
   "license": "UNLICENSED",
   "dependencies": {
+    "@types/minimist": "^1.2.0",
     "@types/node": "^7.0.18",
     "botframework-directlinejs": "^0.9.7",
     "xhr2": "^0.1.4"

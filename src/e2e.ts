@@ -1,13 +1,19 @@
 import { DirectLine, ConnectionStatus, Activity, Message } from 'botframework-directlinejs';
 
+import * as commandLine from "./command-line";
+
 // HAX: This is necessary for Node.js
 // https://github.com/Microsoft/BotFramework-DirectLineJS/issues/20
 global.XMLHttpRequest = require("xhr2");
 
+// Environment vars
 const secret = process.env.DIRECT_LINE_SECRET;
 
 const id = 'e2e';
 const name = 'e2e';
+
+const options = commandLine.getOptions();
+console.log('Loaded command line options: ', options);
 
 console.log('CLIENT: Initialising DirectLine client');
 const directLine = new DirectLine({ secret });
