@@ -1,6 +1,11 @@
-import { DirectLine } from 'botframework-directlinejs';
+import { DirectLine, ConnectionStatus } from 'botframework-directlinejs';
+
+// HAX: This is necessary for Node.js
+// https://github.com/Microsoft/BotFramework-DirectLineJS/issues/20
+global.XMLHttpRequest = require("xhr2");
 
 const secret = process.env.DIRECT_LINE_SECRET;
+
 const id = 'e2e';
 const name = 'e2e';
 
