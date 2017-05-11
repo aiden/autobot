@@ -9,20 +9,17 @@ const minimistOpts: minimist.Opts = {
 };
 
 var argv: {
-    chat_path?: string;
-    _?: string[];
-} = minimist(process.argv.slice(2), minimistOpts);
+      c?: string;
+      _?: string[];
+    } = minimist(process.argv.slice(2), minimistOpts);
 
-interface CommandLineOptions {
-    chat_path: string;
+export interface CommandLineOptions {
+    chatPath: string;
 }
 
 export let getOptions = utils.once((): CommandLineOptions => {
     let options: CommandLineOptions = {
-        chat_path: argv.chat_path,
-    }
-    if (typeof options.chat_path !== 'string') {
-        options.chat_path = null;
+        chatPath: argv.c,
     }
     return options;
 });

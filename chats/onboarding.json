@@ -1,14 +1,10 @@
 [
   {
-    "in": "Hi!",
-    "out": "Hey, how are you!"
+    "text": "Hi!",
+    "type": "outbound"
   },
   {
-    "in": "Hi!",
-    "out": [
-      "Hey, how are you!",
-      "What's up!",
-      "Hey!"
-    ]
+    "text": "Hey, how can I help you?",
+    "type": "inbound"
   }
 ]

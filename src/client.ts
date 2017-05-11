@@ -1,27 +1,32 @@
 'use strict';
 
 import { DirectLine, ConnectionStatus, Activity, Message } from 'botframework-directlinejs';
+import { ChatMessage, ChatMessageType } from './chat';
 
-// HAX: This is necessary for Node.js
-// https://github.com/Microsoft/BotFramework-DirectLineJS/issues/20
-global.XMLHttpRequest = require("xhr2");
+// // HAX: This is necessary for Node.js
+// // https://github.com/Microsoft/BotFramework-DirectLineJS/issues/20
+// global.XMLHttpRequest = require("xhr2");
 
 export class Client {
 
   id = 'e2e';
   name = 'e2e';
+  conectionStatus: string;
+  private directLine: DirectLine;
 
-  directLine: DirectLine;
+  // Listeners
+  private replyListener? : (text: ChatMessage) => void;
 
   constructor(directLineSecret: string) {
     this.directLine = new DirectLine({ secret: directLineSecret });
+    this.subscribeToReplies();
   }
 
-  public send(text: string) {
+  public send(message: ChatMessage) {
     const activity : Activity = {
       from: { id: this.id, name: this.name },
       type: 'message',
-      text: text,
+      text: message.text,
     };
     console.log(`POSTING: '${activity.text}'`);
     this.directLine
@@ -39,7 +44,13 @@ export class Client {
     .subscribe(message => {
       const msg = message as Message;
       console.log(`RECEIVED: '${msg.text}'`);
+      const chatMessage = { text: msg.text, type: ChatMessageType.Inbound };
+      this.replyListener(chatMessage);
     });
+  }
+
+  public listenToReplies(listener: (message: ChatMessage) => void) {
+    this.replyListener = listener;
   }
 
   private subscribeToConnectionStatus() {
