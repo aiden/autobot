@@ -1,5 +1,6 @@
-[![Circle CI](https://circleci.com/gh/aiden/bot-e2e.svg?style=svg&circle-token=undefined)](https://circleci.com/gh/aiden/bot-e2e)
 # e2e-tests
+
+[![CircleCI](https://circleci.com/gh/aiden/bot-e2e.svg?style=svg&circle-token=b945b5b109d685a84d3b1d7794c8fd0b2a4f2e0a)](https://circleci.com/gh/aiden/bot-e2e)
 
 ## Build
 
