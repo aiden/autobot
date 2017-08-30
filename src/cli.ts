@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 'use strict';
 
 import * as path from 'path';
@@ -5,17 +6,25 @@ import * as path from 'path';
 import { Client } from './client';
 import { Chat } from './chat';
 import { ChatRunner } from './runner';
-import * as commandLine from "./command-line";
+import * as program from "commander";
+
+
+let chatPath: string = null;
+
+program
+  .version("0.1.0")
+  .option("-dls", "--direct-line-secret DLS", )
+  .arguments("<chatPath>")
+  .action((chatPathVal) => {
+    chatPath = chatPathVal;
+  })
+  .parse(process.argv);
 
 // Environment vars
-const secret = process.env.DIRECT_LINE_SECRET;
+const secret = program.directLineSecret;
 
 // Client
 const client = new Client(secret);
-
-// Command Line Options
-const options = commandLine.getOptions();
-const chatPath = options.chatPath;
 
 if (!chatPath) {
   // TODO: Improve logic for multiple checks

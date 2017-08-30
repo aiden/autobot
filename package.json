@@ -2,13 +2,14 @@
   "name": "e2e-tests",
   "version": "0.0.1",
   "description": "Aiden bot end-to-end tests",
-  "main": "built/index.js",
-  "types": "built/index.d.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
     "watch": "npm-run-all -p -r -l tsc-watch",
     "tsc-watch": "tsc -w",
-    "clean": "rm -rf built"
+    "clean": "rm -rf dist",
+    "test": "mocha dist/test --recursive"
   },
   "repository": {
     "type": "git",
@@ -17,17 +18,24 @@
   "author": "Dashbot Ltd",
   "license": "UNLICENSED",
   "dependencies": {
-    "@types/minimist": "^1.2.0",
-    "@types/node": "^7.0.18",
-    "botframework-directlinejs": "^0.9.7",
+    "botframework-directlinejs": "^0.9.11",
+    "commander": "^2.11.0",
+    "js-yaml": "^3.9.1",
+    "tslint-config-airbnb": "^5.2.1",
     "xhr2": "^0.1.4"
   },
   "devDependencies": {
+    "@types/chai": "^4.0.4",
+    "@types/js-yaml": "^3.9.1",
+    "@types/mocha": "^2.2.42",
+    "@types/node": "^8.0.26",
+    "chai": "^4.1.1",
+    "eslint": "^3.19.0",
+    "eslint-config-airbnb": "^14.1.0",
+    "mocha": "^3.5.0",
     "npm-run-all": "^3.1.2",
     "source-map-loader": "^0.1.5",
     "ts-loader": "^1.3.3",
-    "typescript": "^2.3.2",
-    "eslint": "^3.19.0",
-    "eslint-config-airbnb": "^14.1.0"
+    "typescript": "^2.3.2"
   }
 }

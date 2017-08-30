@@ -5,7 +5,8 @@ import { ChatMessage, ChatMessageType } from './chat';
 
 // // HAX: This is necessary for Node.js
 // // https://github.com/Microsoft/BotFramework-DirectLineJS/issues/20
-// global.XMLHttpRequest = require("xhr2");
+const globalAny:any = global;
+globalAny.XMLHttpRequest = require('xhr2');
 
 export class Client {
 
@@ -18,7 +19,9 @@ export class Client {
   private replyListener? : (text: ChatMessage) => void;
 
   constructor(directLineSecret: string) {
+    console.log('SECRET', directLineSecret);
     this.directLine = new DirectLine({ secret: directLineSecret });
+    this.subscribeToConnectionStatus();
     this.subscribeToReplies();
   }
 
@@ -32,18 +35,18 @@ export class Client {
     this.directLine
     .postActivity(activity)
     .subscribe(
-      id => {},
-      error => console.log("ERROR: posting activity: ", error)
+      id => {console.log('Got ID: ', id)},
+      error => console.log('ERROR: posting activity: ', error)
     );
   }
 
   private subscribeToReplies() {
     console.log('CLIENT: Subscribing to messages');
     this.directLine.activity$
-    .filter(activity => activity.type === 'message' && activity.from.id !== this.id)
+    // .filter(activity => activity.type === 'message' && activity.from.id !== this.id)
     .subscribe(message => {
       const msg = message as Message;
-      console.log(`RECEIVED: '${msg.text}'`);
+      console.log(`RECEIVED: '${JSON.stringify(msg)}'`);
       const chatMessage = { text: msg.text, type: ChatMessageType.Inbound };
       this.replyListener(chatMessage);
     });
@@ -55,8 +58,10 @@ export class Client {
 
   private subscribeToConnectionStatus() {
     // Monitor connection status
+    console.log('HEY')
     this.directLine.connectionStatus$
     .subscribe(connectionStatus => {
+        console.log('GOT CONNECTION STATUS', connectionStatus);
         switch(connectionStatus) {
             case ConnectionStatus.Uninitialized:
               // the status when the DirectLine object is first created/constructed
