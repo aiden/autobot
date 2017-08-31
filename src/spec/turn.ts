@@ -1,6 +1,6 @@
-import { DialogueInvalidError } from './dialogueInvalidError';
+import { DialogueInvalidError } from './dialogue_invalid_error';
 import { Response } from './response';
-enum Speaker {
+export enum Speaker {
   Human,
   Bot,
 }
@@ -20,9 +20,15 @@ export class Turn {
       throw new DialogueInvalidError('No Human or Bot key on ${JSON.stringify(turnData)}');
     }
 
-    if (typeof data === "string") {
+    if (typeof data === 'string') {
       data = [data];
     }
     this.responses = data.map(responseData => new Response(responseData));
+  }
+  
+  matches(text: string): boolean {
+    return this.responses.some((response) => {
+      return response.matches(text);
+    });
   }
 }

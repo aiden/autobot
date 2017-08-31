@@ -1,5 +1,5 @@
 import { Turn } from './turn';
-import { DialogueInvalidError } from './dialogueInvalidError';
+import { DialogueInvalidError } from './dialogue_invalid_error';
 export class Branch {
   branches: Turn[];
   constructor(branchData: any) {

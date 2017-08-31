@@ -1,7 +1,6 @@
 'use strict';
 
 import { DirectLine, ConnectionStatus, Activity, Message } from 'botframework-directlinejs';
-import { ChatMessage, ChatMessageType } from './chat';
 
 // // HAX: This is necessary for Node.js
 // // https://github.com/Microsoft/BotFramework-DirectLineJS/issues/20

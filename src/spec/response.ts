@@ -1,25 +1,23 @@
-export enum ResponseType {
-  Text,
-  Image,
-}
+import { MessageType  } from './message';
 const wildcardRegex: RegExp = /<\*>/g;
 const wordRegex: RegExp = /<WORD>/g;
 const numberRegex: RegExp = /<NUMBER>/g;
 const regexRegex: RegExp = /<\((.+?)\)>/g;
 
 export class Response {
-  responseType: ResponseType;
-  textMatch: RegExp;
+  responseType: MessageType;
+  textMatchChecker: RegExp;
+
   constructor(responseData: string) {
     const trimmedData = responseData.trim();
-    this.responseType = (trimmedData === '<IMAGE>') ? ResponseType.Image : ResponseType.Text;
-    if (this.responseType === ResponseType.Text) {
-      this.textMatch = new RegExp(Response.transformTags(trimmedData));
+    this.responseType = (trimmedData === '<IMAGE>') ? MessageType.Image : MessageType.Text;
+    if (this.responseType === MessageType.Text) {
+      this.textMatchChecker = new RegExp(Response.transformTags(trimmedData));
     }
   }
 
   matches(text: string): boolean {
-    return text.trim().match(this.textMatch) !== null;
+    return text.trim().match(this.textMatchChecker) !== null;
   }
 
   static transformTags(text: string): string {
@@ -44,7 +42,6 @@ export class Response {
       outText = outText.replace(escapedVersion, regexString);
     });
 
-    console.log(outText);
     return '^' + outText + '$';
   }
   static escapeRegex(text: string): string {

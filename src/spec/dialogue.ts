@@ -1,6 +1,6 @@
 import { Turn } from './turn';
 import { Options } from './options';
-import { DialogueInvalidError } from './dialogueInvalidError';
+import { DialogueInvalidError } from './dialogue_invalid_error';
 import * as jsYaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
