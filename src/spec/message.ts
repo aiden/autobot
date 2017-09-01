@@ -3,7 +3,7 @@ export enum MessageType {
   Image,
 }
 
-export class Message {
+export interface Message {
   messageType: MessageType;
   text: string;
 }

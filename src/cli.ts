@@ -13,7 +13,7 @@ let chatPath: string = null;
 program
   .version('0.1.0')
   .option('-c', '--client', 'Which bot client to use, choose from [botframework]', 'botframework')
-  .option('-dls', '--direct-line-secret DLS', )
+  .option('-dls', '--direct-line-secret DLS')
   .arguments('<chatPath>')
   .action((chatPathVal) => {
     chatPath = chatPathVal;
@@ -37,10 +37,10 @@ if (!chatPath) {
 }
 
 // Load chat from files
-const fullPath = path.resolve(chatPath);
-console.log(`Loading ${fullPath}`);
+// Const fullPath = path.resolve(chatPath);
+// console.log(`Loading ${fullPath}`);
+//
+// const json = require(fullPath);
 
-const json = require(fullPath);
-
-const runner = new ChatRunner(client, chat);
-runner.start();
+// const runner = new ChatRunner(client, chat);
+// runner.start();

@@ -5,7 +5,7 @@ import * as jsYaml from 'js-yaml';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export default class Dialogue {
+export class Dialogue {
   title: string;
   turns: Turn[];
   options: Options;

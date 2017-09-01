@@ -2,7 +2,7 @@
 
 import { DirectLine, ConnectionStatus, Activity, Message as BotMessage } from 'botframework-directlinejs';
 import { Client } from './client_interface';
-import { Message } from '../spec/message';
+import { Message, MessageType } from '../spec/message';
 
 // // HAX: This is necessary for Node.js
 // // https://github.com/Microsoft/BotFramework-DirectLineJS/issues/20
@@ -14,9 +14,6 @@ export class BotFrameworkClient implements Client {
   name = 'e2e';
   conectionStatus: string;
   private directLine: DirectLine;
-
-  // Listeners
-  private replyListener? : (text: ChatBotMessage) => void;
 
   constructor(directLineSecret: string) {
     console.log('SECRET', directLineSecret);
@@ -39,20 +36,18 @@ export class BotFrameworkClient implements Client {
     );
   }
 
-  public subscribeToReplies(callback: (message: BotMessage) => void) {
+  public subscribeToReplies(callback: (message: Message) => void) {
     console.log('CLIENT: Subscribing to messages');
     this.directLine.activity$
     // .filter(activity => activity.type === 'message' && activity.from.id !== this.id)
-    .subscribe(message => {
-      const msg = message as BotMessage;
-      console.log(`RECEIVED: '${JSON.stringify(msg)}'`);
-      const chatBotMessage = { text: msg.text, type: ChatBotMessageType.Inbound };
-      this.replyListener(chatBotMessage);
+    .subscribe((rawMessage: any) => {
+      const message: Message = {
+        messageType: MessageType.Text,
+        text: rawMessage.text,
+      };
+      console.log(`RECEIVED: '${JSON.stringify(rawMessage)}'`);
+      callback(message);
     });
-  }
-
-  public listenToReplies(listener: (message: ChatBotMessage) => void) {
-    this.replyListener = listener;
   }
 
   private subscribeToConnectionStatus() {
