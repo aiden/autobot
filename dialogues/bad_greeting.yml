@@ -1,0 +1,6 @@
+Title: "Greetings"
+Dialogue:
+  - Human: Hey there
+  - Bot:
+    How are you?
+    - Good day!

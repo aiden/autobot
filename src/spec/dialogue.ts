@@ -10,14 +10,18 @@ export class Dialogue {
   turns: Turn[];
   options: Options;
 
-  constructor(filePath: string, defaultOptions: Options) {
+  constructor(filePath: string, options: Options) {
     let dialogueDoc;
     try {
       dialogueDoc = jsYaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
+      if (!dialogueDoc) {
+        throw new DialogueInvalidError('Not a valid yaml: ${filePath}');
+      }
     } catch (e) {
       if (e instanceof jsYaml.YAMLException) {
-        throw new DialogueInvalidError('File is not valid YAML: ${e.message}');
+        throw new DialogueInvalidError(`File is not valid YAML: ${e.message}`);
       } else {
+        throw new DialogueInvalidError(e.message);
       }
     }
     this.title = dialogueDoc.Title ?
@@ -29,6 +33,6 @@ export class Dialogue {
 
     this.turns = dialogueDoc.Dialogue.map(turnData => new Turn(turnData));
 
-    this.options = Object.assign({}, defaultOptions, dialogueDoc.options);
+    this.options = Object.assign({}, options, dialogueDoc.options);
   }
 }

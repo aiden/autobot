@@ -36,10 +36,10 @@ export class Turn {
         .map(x => x.map(y => new Turn(y)));
       if (this.branches.length !== numBranches) {
         throw new DialogueInvalidError(
-          'Branch numbers do not go from 1 to ${numBranches}: ${JSON.stringify(branchData)}');
+          `Branch numbers do not go from 1 to ${numBranches}: ${JSON.stringify(data)}`);
       }
     } else {
-      throw new DialogueInvalidError('No Human, Bot, or Branch key on ${JSON.stringify(turnData)}');
+      throw new DialogueInvalidError(`No Human, Bot, or Branch key on ${JSON.stringify(turnData)}`);
     }
   }
   
@@ -63,7 +63,7 @@ export class Turn {
       });
       return matchingBranch ? matchingBranch : false;
     } else {
-      throw new Error('matches() only supports Branch and Bot turns: ${JSON.stringify(this)}');
+      throw new Error(`matches() only supports Branch and Bot turns: ${JSON.stringify(this)}`);
     }
   }
 }

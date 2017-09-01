@@ -27,7 +27,7 @@ export class BotFrameworkClient implements Client {
       type: 'message',
       text: text,
     };
-    console.log(`POSTING: '${activity.text}'`);
+    console.log(`POSTING: ${activity.text}`);
     this.directLine
     .postActivity(activity)
     .subscribe(
@@ -45,7 +45,7 @@ export class BotFrameworkClient implements Client {
         messageType: MessageType.Text,
         text: rawMessage.text,
       };
-      console.log(`RECEIVED: '${JSON.stringify(rawMessage)}'`);
+      console.log(`RECEIVED: ${JSON.stringify(rawMessage)}`);
       callback(message);
     });
   }
