@@ -9,7 +9,7 @@
     "watch": "npm-run-all -p -r -l tsc-watch",
     "tsc-watch": "tsc -w",
     "clean": "rm -rf dist",
-    "test": "mocha dist/test --recursive"
+    "test": "mocha --harmony dist/test --recursive"
   },
   "repository": {
     "type": "git",
