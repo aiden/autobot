@@ -16,7 +16,7 @@ export class MockClient {
     if (this.cb) {
       this.cb(message);
     } else {
-      throw new Error("subscribeToReplies has not been called yet");
+      throw new Error('subscribeToReplies has not been called yet');
     }
   }
 

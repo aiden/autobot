@@ -1,34 +1,34 @@
 'use strict';
 
-import { DirectLine, ConnectionStatus, Activity, Message } from 'botframework-directlinejs';
+import { DirectLine, ConnectionStatus, Activity, Message as BotMessage } from 'botframework-directlinejs';
+import { Client } from './client_interface';
+import { Message } from '../spec/message';
 
 // // HAX: This is necessary for Node.js
 // // https://github.com/Microsoft/BotFramework-DirectLineJS/issues/20
 const globalAny:any = global;
 globalAny.XMLHttpRequest = require('xhr2');
 
-export class Client {
-
+export class BotFrameworkClient implements Client {
   id = 'e2e';
   name = 'e2e';
   conectionStatus: string;
   private directLine: DirectLine;
 
   // Listeners
-  private replyListener? : (text: ChatMessage) => void;
+  private replyListener? : (text: ChatBotMessage) => void;
 
   constructor(directLineSecret: string) {
     console.log('SECRET', directLineSecret);
     this.directLine = new DirectLine({ secret: directLineSecret });
     this.subscribeToConnectionStatus();
-    this.subscribeToReplies();
   }
 
-  public send(message: ChatMessage) {
+  public send(text: string) {
     const activity : Activity = {
       from: { id: this.id, name: this.name },
       type: 'message',
-      text: message.text,
+      text: text,
     };
     console.log(`POSTING: '${activity.text}'`);
     this.directLine
@@ -39,19 +39,19 @@ export class Client {
     );
   }
 
-  private subscribeToReplies() {
+  public subscribeToReplies(callback: (message: BotMessage) => void) {
     console.log('CLIENT: Subscribing to messages');
     this.directLine.activity$
     // .filter(activity => activity.type === 'message' && activity.from.id !== this.id)
     .subscribe(message => {
-      const msg = message as Message;
+      const msg = message as BotMessage;
       console.log(`RECEIVED: '${JSON.stringify(msg)}'`);
-      const chatMessage = { text: msg.text, type: ChatMessageType.Inbound };
-      this.replyListener(chatMessage);
+      const chatBotMessage = { text: msg.text, type: ChatBotMessageType.Inbound };
+      this.replyListener(chatBotMessage);
     });
   }
 
-  public listenToReplies(listener: (message: ChatMessage) => void) {
+  public listenToReplies(listener: (message: ChatBotMessage) => void) {
     this.replyListener = listener;
   }
 

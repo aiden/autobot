@@ -1,34 +1,68 @@
 import { DialogueInvalidError } from './dialogue_invalid_error';
 import { Response } from './response';
-export enum Speaker {
+export enum TurnType {
   Human,
   Bot,
+  Branch,
 }
 export class Turn {
-  speaker: Speaker;
+  turnType: TurnType;
   responses: Response[];
+  branches: Turn[][];
+  next: Turn;
 
   constructor(turnData: any) {
     let data;
-    if (turnData.Human) {
-      this.speaker = Speaker.Human;
-      data = turnData.Human;
-    } else if (turnData.Bot) {
-      this.speaker = Speaker.Bot;
-      data = turnData.Bot;
+    if (turnData.Human || turnData.Bot) {
+      if (turnData.Human) {
+        this.turnType = TurnType.Human;
+        data = turnData.Human;
+      } else if (turnData.Bot) {
+        this.turnType = TurnType.Bot;
+        data = turnData.Bot;
+      }
+      if (typeof data === 'string') {
+        data = [data];
+      }
+      this.responses = data.map(responseData => new Response(responseData));
+    } else if (turnData.Branch) {
+      this.turnType = TurnType.Branch;
+      data = turnData.Branch;
+
+      const numBranches = Object.keys(data).length;
+      this.branches = [...Array(numBranches)]
+        .map((_, i) => data[i + 1])
+        .filter(x => x)
+        .map(x => x.map(y => new Turn(y)));
+      if (this.branches.length !== numBranches) {
+        throw new DialogueInvalidError(
+          'Branch numbers do not go from 1 to ${numBranches}: ${JSON.stringify(branchData)}');
+      }
     } else {
       throw new DialogueInvalidError('No Human or Bot key on ${JSON.stringify(turnData)}');
     }
-
-    if (typeof data === 'string') {
-      data = [data];
-    }
-    this.responses = data.map(responseData => new Response(responseData));
   }
   
-  matches(text: string): boolean {
-    return this.responses.some((response) => {
-      return response.matches(text);
-    });
+  /** Tests if this phrase matches this turn.
+   *  Returns:
+   *    - true if it is a simple text match
+   *    - Turn[] if it matches a branch, returns the branch to go to.
+   *    - false if there is no match **/
+  matches(text: string): Turn | boolean {
+    if (this.turnType === TurnType.Bot) {
+      return this.responses.some((response) => {
+        return response.matches(text);
+      });
+    } else if (this.turnType === TurnType.Branch) {
+      this.branches.find((turnList) => {
+        if (turnList[0].turnType === TurnType.Bot) {
+          return turnList[0].matches(text) !== false;
+        } else {
+          return false;
+        }
+      });
+    } else {
+      throw new Error('matches() only supports Branch and Bot turns: ${JSON.stringify(this)}');
+    }
   }
 }
