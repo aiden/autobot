@@ -27,9 +27,9 @@ export class Turn {
         data = [data];
       }
       if (turnData.Human) {
-        this.responses = data.map(responseData => new Response(responseData));
-      } else {
         this.queries = data;
+      } else {
+        this.responses = data.map(responseData => new Response(responseData));
       }
     } else if (turnData.Branch) {
       this.turnType = TurnType.Branch;
