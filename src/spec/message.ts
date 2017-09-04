@@ -6,4 +6,5 @@ export enum MessageType {
 export interface Message {
   messageType: MessageType;
   text: string;
+  user: string;
 }

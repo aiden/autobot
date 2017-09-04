@@ -41,7 +41,7 @@ $ npm run build
 Title: Greetings
 Dialogue:
 	- Human: Hey bot, how are you?
-  - Bot: <$i_am_good>
+  - Bot:
     - Hi <*>, I'm great thanks
     - Feeling odd, might be some bugs
   - Human: What's the date today?

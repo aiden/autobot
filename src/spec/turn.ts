@@ -5,6 +5,7 @@ export enum TurnType {
   Bot,
   Branch,
 }
+
 export class Turn {
   turnType: TurnType;
   responses: Response[];

@@ -6,8 +6,7 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "watch": "npm-run-all -p -r -l tsc-watch",
-    "tsc-watch": "tsc -w",
+    "watch": "tsc -w",
     "clean": "rm -rf dist",
     "test": "mocha --harmony dist/test --recursive"
   },

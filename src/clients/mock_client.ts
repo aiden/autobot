@@ -4,7 +4,7 @@ import { Message } from '../spec/message';
 export class MockClient {
   cb: (message: Message) => void;
 
-  send(text: string) {
+  send(message: Message) {
     // stub function
   }
 

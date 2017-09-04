@@ -1,4 +1,6 @@
 import { MessageType  } from './message';
+import { Translator } from '../translator';
+
 const wildcardRegex: RegExp = /<\*>/g;
 const wordRegex: RegExp = /<WORD>/g;
 const numberRegex: RegExp = /<NUMBER>/g;
@@ -21,7 +23,10 @@ export class Response {
   }
 
   static transformTags(text: string): string {
-    const taggedText = text.replace(wildcardRegex, '<(.*?)>')
+    regexRegex.lastIndex = 0;
+
+    const taggedText = text
+      .replace(wildcardRegex, '<(.*?)>')
       .replace(wordRegex, '<([^ ]+?)>')
       .replace(numberRegex, '<([0-9\.]+)>');
 

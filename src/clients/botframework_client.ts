@@ -21,11 +21,11 @@ export class BotFrameworkClient implements Client {
     this.subscribeToConnectionStatus();
   }
 
-  public send(text: string) {
+  public send(message: Message) {
     const activity : Activity = {
-      from: { id: this.id, name: this.name },
+      from: { id: message.user, name: message.user },
       type: 'message',
-      text: text,
+      text: message.text,
     };
     console.log(`POSTING: ${activity.text}`);
     this.directLine
@@ -41,11 +41,12 @@ export class BotFrameworkClient implements Client {
     this.directLine.activity$
     // .filter(activity => activity.type === 'message' && activity.from.id !== this.id)
     .subscribe((rawMessage: any) => {
+      console.log(`RECEIVED: ${JSON.stringify(rawMessage)}`);
       const message: Message = {
         messageType: MessageType.Text,
         text: rawMessage.text,
+        user: rawMessage.user,
       };
-      console.log(`RECEIVED: ${JSON.stringify(rawMessage)}`);
       callback(message);
     });
   }
