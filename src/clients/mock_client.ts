@@ -18,9 +18,12 @@ export class MockClient implements Client {
     this.cb = callback;
   }
 
+  close() {
+
+  }
+
   read(user: string): string {
     const messageQueue = this.received.get(user);
-    console.log('READING', messageQueue);
     if (messageQueue === undefined) {
       return null;
     } else {

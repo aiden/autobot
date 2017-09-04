@@ -28,6 +28,9 @@ export class Dialogue {
     if (!dialogueDoc.Dialogue) {
       throw new DialogueInvalidError('No dialogue found');
     }
+    if (!(dialogueDoc.Dialogue instanceof Array)) {
+      throw new DialogueInvalidError('Dialogue lines must start with dashes');
+    }
 
     this.turns = dialogueDoc.Dialogue.map(turnData => new Turn(turnData));
   }

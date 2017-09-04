@@ -1,12 +1,15 @@
 #!/usr/bin/env node --harmony
 'use strict';
 
-import * as path from 'path';
-
 import { Message } from './spec/message';
 import { Runner } from './runner';
-import * as program from 'commander';
 import { BotFrameworkClient } from './clients/botframework_client';
+import { Client } from './clients/client_interface';
+import { Config, defaultConfig, ClientType } from './config';
+
+import * as jsYaml from 'js-yaml';
+import * as fs from 'fs';
+import * as program from 'commander';
 
 
 let chatPath: string = null;
@@ -19,27 +22,26 @@ program
   })
   .parse(process.argv);
 
-// Client
-let client;
-if (program.client === 'botframework') {
-  if (!program.directLineSecret) {
-    console.error('ERROR: no directLine secret provided');
-    process.exit(1);
-  }
-  client = new BotFrameworkClient(program.dls);
-}
+const config: Config = Object.assign(
+  {},
+  defaultConfig,
+  jsYaml.safeLoad(fs.readFileSync('./config.yml', 'utf8')));
+let client: Client;
 
-if (!chatPath) {
-  // TODO: Improve logic for multiple checks
-  console.log('ERROR: No chat files provided');
+if (config.client === ClientType.BotFramework) {
+  client = new BotFrameworkClient(config.directLineSecret);
+} else {
+  console.log('ERROR: unsupported client', config.client);
   process.exit(1);
 }
 
-// Load chat from files
-// Const fullPath = path.resolve(chatPath);
-// console.log(`Loading ${fullPath}`);
-//
-// const json = require(fullPath);
+const runner = new Runner(client, chatPath, config);
+runner.start().then((results) => {
+  results.forEach(result => console.log(result));
+  console.log('DONE');
+}).catch((err) => {
+  console.log('ERR:', err);
+}).then(() => {
+  client.close();
+});
 
-// const runner = new ChatRunner(client, chat);
-// runner.start();

@@ -1,6 +1,10 @@
 'use strict';
 
-import { DirectLine, ConnectionStatus, Activity, Message as BotMessage } from 'botframework-directlinejs';
+import {
+  DirectLine,
+  ConnectionStatus,
+  Activity,
+  Message as BotMessage } from 'botframework-directlinejs';
 import { Client } from './client_interface';
 import { Message, MessageType } from '../spec/message';
 
@@ -10,15 +14,13 @@ const globalAny:any = global;
 globalAny.XMLHttpRequest = require('xhr2');
 
 export class BotFrameworkClient implements Client {
-  id = 'e2e';
-  name = 'e2e';
-  conectionStatus: string;
+  private conectionStatus: string;
   private directLine: DirectLine;
+  private convoIdToUser = new Map<string, string>();
 
   constructor(directLineSecret: string) {
-    console.log('SECRET', directLineSecret);
     this.directLine = new DirectLine({ secret: directLineSecret });
-    this.subscribeToConnectionStatus();
+    // this.subscribeToConnectionStatus();
   }
 
   public send(message: Message) {
@@ -31,60 +33,75 @@ export class BotFrameworkClient implements Client {
     this.directLine
     .postActivity(activity)
     .subscribe(
-      id => {console.log('Got ID: ', id)},
-      error => console.log('ERROR: posting activity: ', error)
+      id => null,
+      error => console.log('ERROR: posting activity: ', error),
     );
   }
 
   public subscribeToReplies(callback: (message: Message) => void) {
-    console.log('CLIENT: Subscribing to messages');
     this.directLine.activity$
-    // .filter(activity => activity.type === 'message' && activity.from.id !== this.id)
-    .subscribe((rawMessage: any) => {
-      console.log(`RECEIVED: ${JSON.stringify(rawMessage)}`);
-      const message: Message = {
-        messageType: MessageType.Text,
-        text: rawMessage.text,
-        user: rawMessage.user,
-      };
-      callback(message);
+    .filter(activity => activity.type === 'message')
+    .subscribe((dlMessage: BotMessage) => {
+      console.log(`RECEIVED: ${JSON.stringify(dlMessage)}`);
+      if (dlMessage.from.id.indexOf('testuser') !== -1) {
+        // Outbound message
+        this.convoIdToUser.set(dlMessage.conversation.id, dlMessage.from.name);
+      } else {
+        // inbound message
+        const user = this.convoIdToUser.get(dlMessage.conversation.id);
+        if (user === undefined) {
+          console.log('Unrecognized conversation on directline', dlMessage);
+          return;
+        }
+        const message: Message = {
+          user,
+          messageType: MessageType.Text,
+          text: dlMessage.text,
+        };
+        callback(message);
+      }
     });
   }
 
-  private subscribeToConnectionStatus() {
-    // Monitor connection status
-    console.log('HEY')
-    this.directLine.connectionStatus$
-    .subscribe(connectionStatus => {
-        console.log('GOT CONNECTION STATUS', connectionStatus);
-        switch(connectionStatus) {
-            case ConnectionStatus.Uninitialized:
-              // the status when the DirectLine object is first created/constructed
-              console.log('CONNECTION: Uninitialized');
-              break;
-            case ConnectionStatus.Connecting:
-              // currently trying to connect to the conversation
-              console.log('CONNECTION: Connecting');
-              break;
-            case ConnectionStatus.Online:
-              // successfully connected to the converstaion. Connection is healthy so far as we know.
-              console.log('CONNECTION: Online');
-              break;
-            case ConnectionStatus.ExpiredToken:
-              // last operation errored out with an expired token. Your app should supply a new one.
-              console.log('CONNECTION: ExpiredToken');
-              break;
-            case ConnectionStatus.FailedToConnect:
-              // the initial attempt to connect to the conversation failed. No recovery possible.
-              console.log('CONNECTION: Failed');
-              break;
-            case ConnectionStatus.Ended:
-              // the bot ended the conversation
-              console.log('CONNECTION: Ended');
-              break;
-        }
-    });
+  public close() {
+    this.directLine.end();
   }
+
+  // Only for debugging purposes
+  // private subscribeToConnectionStatus() {
+  //   // Monitor connection status
+  //   console.log('HEY')
+  //   this.directLine.connectionStatus$
+  //   .subscribe(connectionStatus => {
+  //       console.log('GOT CONNECTION STATUS', connectionStatus);
+  //       switch(connectionStatus) {
+  //           case ConnectionStatus.Uninitialized:
+  //             // the status when the DirectLine object is first created/constructed
+  //             console.log('CONNECTION: Uninitialized');
+  //             break;
+  //           case ConnectionStatus.Connecting:
+  //             // currently trying to connect to the conversation
+  //             console.log('CONNECTION: Connecting');
+  //             break;
+  //           case ConnectionStatus.Online:
+  //             // successfully connected to the converstaion. Connection is healthy so far as we know.
+  //             console.log('CONNECTION: Online');
+  //             break;
+  //           case ConnectionStatus.ExpiredToken:
+  //             // last operation errored out with an expired token. Your app should supply a new one.
+  //             console.log('CONNECTION: ExpiredToken');
+  //             break;
+  //           case ConnectionStatus.FailedToConnect:
+  //             // the initial attempt to connect to the conversation failed. No recovery possible.
+  //             console.log('CONNECTION: Failed');
+  //             break;
+  //           case ConnectionStatus.Ended:
+  //             // the bot ended the conversation
+  //             console.log('CONNECTION: Ended');
+  //             break;
+  //       }
+  //   });
+  // }
 }
 
 export default Client;

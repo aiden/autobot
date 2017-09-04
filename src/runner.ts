@@ -55,14 +55,13 @@ export class Runner {
       const testMeta: TestMeta = {
         dialogue,
         branchNumber: 0,
-        lastMessage: new Date().getTime() / 1000,
+        lastMessage: new Date().getTime(),
       };
       this.userMetadata.set(Runner.getUsername(testMeta), testMeta);
     });
     this.client.subscribeToReplies((message: Message) => {
-      console.log('GOT REPLY');
       const test = this.userMetadata.get(message.user);
-      test.lastMessage = new Date().getTime() / 1000;
+      test.lastMessage = new Date().getTime();
       if (this.results.has(test)) {
         // Short circuit as this test is already done
         return;
@@ -77,7 +76,6 @@ export class Runner {
 
   public start(): Promise<TestResult[]> {
     return new Promise((resolve, reject) => {
-      console.log("RUNNER STARTED");
       this.onComplete = resolve;
       this.onReject = reject;
       this.userMetadata.forEach((test, username) => {
@@ -96,22 +94,20 @@ export class Runner {
       const intervalCheckIfDone = () => {
         this.checkIfComplete();
         if (!this.done) {
-          setTimeout(intervalCheckIfDone, 1000);
+          setTimeout(intervalCheckIfDone, this.config.timeout / 2);
         }
       };
-      setTimeout(intervalCheckIfDone, 1000);
+      setTimeout(intervalCheckIfDone, this.config.timeout / 2);
     });
   }
 
   private executeTurn(test: TestMeta, response: Message) {
     try {
       // It is only null on the first execution
-      console.log("CHECKING RESPONSE", response);
       const stack = this.stacks.get(test);
       if (response !== null) {
         const expected = stack[0];
         if (!expected.matches(response.text)) {
-          console.log("FAILING TEST");
           this.results.set(test, {
             passed: false,
             errorMessage: `Expected:${JSON.stringify(expected.responses)}\nGot:${response.text}`,
@@ -122,12 +118,10 @@ export class Runner {
         stack.shift();
       }
       let next: Turn;
-      console.log("EXECUTE TURN", stack[0], stack.length, stack);
       while (stack.length > 0 &&
           ((next = stack[0]).turnType === TurnType.Human ||
           (next.turnType === TurnType.Branch && next.humanBranches.length > 0))) {
         const turn = next.turnType === TurnType.Human ? next : next.humanBranches[0][0];
-        console.log('SENDING', turn.queries[0]);
         this.client.send({
           messageType: MessageType.Text,
           user: Runner.getUsername(test),
@@ -143,7 +137,6 @@ export class Runner {
         this.checkIfComplete();
       }
     } catch (e) {
-      console.log('WARN:', e);
       this.onReject(e);
     }
   }
@@ -154,7 +147,7 @@ export class Runner {
       return;
     }
 
-    const now = new Date().getTime() / 1000;
+    const now = new Date().getTime();
 
     this.userMetadata.forEach((test) => {
       if (!this.results.has(test) && (now - test.lastMessage > this.config.timeout)) {
@@ -168,7 +161,6 @@ export class Runner {
 
     if (this.results.size === this.userMetadata.size) {
       this.done = true;
-      console.log("ENDING PROMISE");
       this.onComplete(Array.from(this.results.values()));
     }
   }
