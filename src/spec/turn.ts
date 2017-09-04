@@ -9,6 +9,7 @@ export enum TurnType {
 export class Turn {
   turnType: TurnType;
   responses: Response[];
+  queries: string[];
   branches: Turn[][];
   next: Turn;
 
@@ -25,7 +26,11 @@ export class Turn {
       if (typeof data === 'string') {
         data = [data];
       }
-      this.responses = data.map(responseData => new Response(responseData));
+      if (turnData.Human) {
+        this.responses = data.map(responseData => new Response(responseData));
+      } else {
+        this.queries = data;
+      }
     } else if (turnData.Branch) {
       this.turnType = TurnType.Branch;
       data = turnData.Branch;

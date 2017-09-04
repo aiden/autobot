@@ -54,7 +54,7 @@ export class ChatRunner {
       this.client.send({
         messageType: MessageType.Text,
         user: `testuser-${title}`,
-        text: next.responses[0].original,
+        text: next.queries[0],
       });
     }
   }
