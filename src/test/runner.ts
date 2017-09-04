@@ -51,4 +51,20 @@ describe('runner.ts', () => {
       expect.fail(reason);
     });
   });
+  it('should timeout', () => {
+    const client = new MockClient();
+    const runner = new Runner(
+      client,
+      getDialoguePath('simple/simple.yml'),
+      Object.assign({}, defaultConfig, { timeout: 500 }));
+    return runner.start().then((results) => {
+      results.forEach((testResult) => {
+        expect(testResult.passed).to.be.false;
+        expect(testResult.errorMessage).to.contain('timeout');
+      });
+      console.log("FINISHED TESTING");
+    }).catch((reason) => {
+      expect.fail(reason);
+    });
+  });
 });
