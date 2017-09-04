@@ -1,6 +1,7 @@
 {
   "hey": "hello",
   "yo": "what's up?",
+  "luisVar": "hi %(var)",
   "friend": [
     "mate",
     "amigo"

@@ -1,5 +1,4 @@
 import { Turn } from './turn';
-import { Options } from './options';
 import { DialogueInvalidError } from './dialogue_invalid_error';
 import * as jsYaml from 'js-yaml';
 import * as fs from 'fs';
@@ -8,9 +7,8 @@ import * as path from 'path';
 export class Dialogue {
   title: string;
   turns: Turn[];
-  options: Options;
 
-  constructor(filePath: string, options: Options) {
+  constructor(filePath: string) {
     let dialogueDoc;
     try {
       dialogueDoc = jsYaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
@@ -32,7 +30,5 @@ export class Dialogue {
     }
 
     this.turns = dialogueDoc.Dialogue.map(turnData => new Turn(turnData));
-
-    this.options = Object.assign({}, options, dialogueDoc.options);
   }
 }

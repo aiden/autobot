@@ -8,10 +8,12 @@ const regexRegex: RegExp = /<\((.+?)\)>/g;
 
 export class Response {
   responseType: MessageType;
-  textMatchChecker: RegExp;
+  private textMatchChecker: RegExp;
+  original: string;
 
   constructor(responseData: string) {
     const trimmedData = responseData.trim();
+    this.original = trimmedData;
     this.responseType = (trimmedData === '<IMAGE>') ? MessageType.Image : MessageType.Text;
     if (this.responseType === MessageType.Text) {
       this.textMatchChecker = new RegExp(Response.transformTags(trimmedData));

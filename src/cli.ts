@@ -4,19 +4,15 @@
 import * as path from 'path';
 
 import { Message } from './spec/message';
-import { ChatRunner } from './runner';
+import { Runner } from './runner';
 import * as program from 'commander';
 import { BotFrameworkClient } from './clients/botframework_client';
+
 
 let chatPath: string = null;
 
 program
   .version('0.1.0')
-  .option('-c', '--client', 'Which bot client to use, choose from [botframework]', 'botframework')
-  .option('-dls', '--direct-line-secret DLS', 'Direct line secret, for use with botframework')
-  .option('-l', '--locale files', 'The locale files to translate')
-  .option('-ll', '--luis-locale', 'Indicate that the locale is a luis locale, and replace %(var) variables')
-  .option('-s', '--strip', 'Strips all non alphanumeric characters from the chat responses')
   .arguments('<chatPath>')
   .action((chatPathVal) => {
     chatPath = chatPathVal;

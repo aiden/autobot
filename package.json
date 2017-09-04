@@ -19,6 +19,7 @@
   "dependencies": {
     "botframework-directlinejs": "^0.9.11",
     "commander": "^2.11.0",
+    "glob": "^7.1.2",
     "js-yaml": "^3.9.1",
     "tslint-config-airbnb": "^5.2.1",
     "xhr2": "^0.1.4"

@@ -1,15 +1,14 @@
 'use strict';
 
-import { Config } from './config';
 import * as fs from 'fs';
 
 const translateRegex = /<\$(.+?)>/;
+const translateLuis = /%\(.+?\)/g;
 
 export class Translator {
-  static translations: Map<string, string[]>;
-  static config: Config;
+  private static translations: Map<string, string[]>;
 
-  static loadTranslation(translationFiles: string[], config: Config) {
+  static loadTranslation(translationFiles: string[], isLuisLocale: boolean) {
     Translator.translations = translationFiles
       .map(filePath => JSON.parse(fs.readFileSync(filePath, 'utf8')))
       .reduce(
@@ -22,6 +21,13 @@ export class Translator {
             if (!Array.isArray(val)) {
               throw new Error(`locale file must contain string or array values, got: ${val}`);
             }
+
+            if (isLuisLocale) {
+              val = val.map((localeLine) => {
+                return localeLine.replace(translateLuis, '<*>');
+              });
+            }
+
             if (res.has(key)) {
               res.set(key, res.get(key).concat(val));
             } else {
@@ -31,7 +37,6 @@ export class Translator {
           return res;
         },
         new Map<string, string[]>());
-    Translator.config = config;
   }
 
   static translate(original: string): string[] {

@@ -10,8 +10,8 @@ export class Turn {
   turnType: TurnType;
   responses: Response[];
   queries: string[];
-  branches: Turn[][];
-  next: Turn;
+  humanBranches: Turn[][];
+  botBranches: Turn[][];
 
   constructor(turnData: any) {
     let data;
@@ -36,14 +36,16 @@ export class Turn {
       data = turnData.Branch;
 
       const numBranches = Object.keys(data).length;
-      this.branches = [...Array(numBranches)]
+      const branches: Turn[][] = [...Array(numBranches)]
         .map((_, i) => data[i + 1])
         .filter(x => x && x instanceof Array)
         .map(x => x.map(y => new Turn(y)));
-      if (this.branches.length !== numBranches) {
+      if (branches.length !== numBranches) {
         throw new DialogueInvalidError(
           `Branch numbers do not go from 1 to ${numBranches}: ${JSON.stringify(data)}`);
       }
+      this.humanBranches = branches.filter(branch => branch[0].turnType === TurnType.Human);
+      this.botBranches = branches.filter(branch => branch[0].turnType === TurnType.Bot);
     } else {
       throw new DialogueInvalidError(`No Human, Bot, or Branch key on ${JSON.stringify(turnData)}`);
     }
@@ -60,7 +62,7 @@ export class Turn {
         return response.matches(text);
       });
     } else if (this.turnType === TurnType.Branch) {
-      const matchingBranch = this.branches.find((turnList) => {
+      const matchingBranch = this.botBranches.find((turnList) => {
         if (turnList[0].turnType === TurnType.Bot) {
           return turnList[0].matches(text) !== false;
         } else {
@@ -69,7 +71,19 @@ export class Turn {
       });
       return matchingBranch ? matchingBranch : false;
     } else {
-      throw new Error(`matches() only supports Branch and Bot turns: ${JSON.stringify(this)}`);
+      return false;
+    }
+  }
+
+  toString(): string {
+    switch (this.turnType) {
+      case TurnType.Bot:
+        return this.responses.map(response => response.original).join(' | ');
+      case TurnType.Human:
+        return this.queries.join(' | ');
+      case TurnType.Branch:
+        return this.botBranches.concat(this.humanBranches)
+          .map(branch => branch[0].toString()).join(' | ');
     }
   }
 }
