@@ -8,8 +8,10 @@ import { DialogueInvalidError } from './spec/dialogue_invalid_error';
 
 import * as fs from 'fs';
 import * as glob from 'glob';
+import * as path from 'path';
 
 export interface TestResult {
+  test: TestMeta;
   passed: boolean;
   errorMessage: string;
 };
@@ -22,7 +24,8 @@ export interface TestMeta {
 
 export class Runner {
   private client: Client;
-  private userMetadata = new Map<string, TestMeta>();
+  dialogues: Dialogue[];
+  userMetadata = new Map<string, TestMeta>();
   private results = new Map<TestMeta, TestResult>();
   private stacks = new Map<TestMeta, Turn[]>();
   private onComplete: (results: TestResult[]) => void;
@@ -39,18 +42,18 @@ export class Runner {
     }
 
     const dialogueFileInfo = fs.lstatSync(dialoguePath);
-    let dialogues: Dialogue[];
     if (dialogueFileInfo.isDirectory()) {
-      dialogues = glob.sync('*.yml', {
+      this.dialogues = glob.sync('*.yml', {
         cwd: dialoguePath,
         matchBase: true,
-      }).map(filepath => new Dialogue(filepath));
+      }).filter(filepath => path.basename(filepath) !== 'config.yml')
+        .map(filepath => new Dialogue(filepath));
     } else if (dialogueFileInfo.isFile()) {
-      dialogues = [new Dialogue(dialoguePath)];
+      this.dialogues = [new Dialogue(dialoguePath)];
     } else {
       throw new DialogueInvalidError(`${dialoguePath} does not exist`);
     }
-    dialogues.forEach((dialogue) => {
+    this.dialogues.forEach((dialogue) => {
       // Create a test user per dialogue branch
       const testMeta: TestMeta = {
         dialogue,
@@ -74,30 +77,36 @@ export class Runner {
     return `testuser-${test.dialogue.title}-${test.branchNumber}`;
   }
 
-  public start(): Promise<TestResult[]> {
+  public start(onStart?: () => void): Promise<TestResult[]> {
     return new Promise((resolve, reject) => {
       this.onComplete = resolve;
       this.onReject = reject;
-      this.userMetadata.forEach((test, username) => {
-        const stack: Turn[] = [];
-        if (this.preamble) {
-          this.preamble.forEach((turn) => {
+      this.client.onReady().then(() => {
+        if (onStart) {
+          onStart();
+        }
+        this.userMetadata.forEach((test, username) => {
+          const stack: Turn[] = [];
+          if (this.preamble) {
+            this.preamble.forEach((turn) => {
+              stack.push(turn);
+            });
+          }
+          test.dialogue.turns.forEach((turn) => {
             stack.push(turn);
           });
-        }
-        test.dialogue.turns.forEach((turn) => {
-          stack.push(turn);
+          this.stacks.set(test, stack);
+          this.executeTurn(test, null);
         });
-        this.stacks.set(test, stack);
-        this.executeTurn(test, null);
+        const intervalCheckIfDone = () => {
+          this.checkIfComplete();
+          if (!this.done) {
+            setTimeout(intervalCheckIfDone, this.config.timeout / 2);
+          }
+        };
+        setTimeout(intervalCheckIfDone, this.config.timeout / 2);
+
       });
-      const intervalCheckIfDone = () => {
-        this.checkIfComplete();
-        if (!this.done) {
-          setTimeout(intervalCheckIfDone, this.config.timeout / 2);
-        }
-      };
-      setTimeout(intervalCheckIfDone, this.config.timeout / 2);
     });
   }
 
@@ -109,8 +118,9 @@ export class Runner {
         const expected = stack[0];
         if (!expected.matches(response.text)) {
           this.results.set(test, {
+            test,
             passed: false,
-            errorMessage: `Expected:${JSON.stringify(expected.responses)}\nGot:${response.text}`,
+            errorMessage: `\t\tExpected: ${expected.toString()}\n\t\tGot: ${response.text}`,
           });
           this.checkIfComplete();
           return;
@@ -131,6 +141,7 @@ export class Runner {
       }
       if (stack.length === 0) {
         this.results.set(test, {
+          test,
           passed: true,
           errorMessage: null,
         });
@@ -153,6 +164,7 @@ export class Runner {
       if (!this.results.has(test) && (now - test.lastMessage > this.config.timeout)) {
         const stack = this.stacks.get(test);
         this.results.set(test, {
+          test,
           passed: false,
           errorMessage: `timeout waiting on ${stack[stack.length - 1].toString()}`,
         });

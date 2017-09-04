@@ -19,7 +19,12 @@ export class MockClient implements Client {
   }
 
   close() {
+  }
 
+  onReady() {
+    return new Promise<void>((resolve) => {
+      resolve();
+    });
   }
 
   read(user: string): string {
