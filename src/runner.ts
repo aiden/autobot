@@ -93,11 +93,11 @@ export class Runner {
         this.userMetadata.forEach((test, username) => {
           const stack: Turn[] = [];
           if (this.preamble) {
-            this.preamble.reverse().forEach((turn) => {
+            this.preamble.slice().reverse().forEach((turn) => {
               stack.push(turn);
             });
           }
-          test.dialogue.turns.reverse().forEach((turn) => {
+          test.dialogue.turns.slice().reverse().forEach((turn) => {
             stack.push(turn);
           });
           this.stacks.set(test, stack);
@@ -119,12 +119,10 @@ export class Runner {
     try {
       // It is only null on the first execution
       const stack = this.stacks.get(test);
-      // console.log('TURN', stack[stack.length - 1], response);
       if (response !== null) {
         const nextBot = stack.pop();
         if (nextBot.numRunnersEntered === nextBot.numRunnersRequired) {
           // Kill this instance if exhausted
-          // console.log('TERMINATING FOR EXHAUSTED TURN');
           this.terminateInstance(test);
           return;
         }
@@ -139,7 +137,6 @@ export class Runner {
             expected = `\t\t${matchArray[0]}`;
           }
 
-          // console.log('FAILING')
           this.results.set(test.dialogue, {
             dialogue: test.dialogue,
             passed: false,
@@ -152,7 +149,6 @@ export class Runner {
         if (match instanceof Array) {
           // Means it matched an exhausted branch, terminate this runner
           if (match.length === 0) {
-            // console.log('TERMINATING FOR EXHAUSTED BRANCHES');
             this.terminateInstance(test);
             return;
           }
@@ -166,9 +162,12 @@ export class Runner {
       }
 
       let next: Turn;
+      let nextBranch;
       while (stack.length > 0 &&
           ((next = stack[stack.length - 1]).turnType === TurnType.Human ||
-          (next.turnType === TurnType.Branch && next.humanBranches.length > 0))) {
+          (next.turnType === TurnType.Branch &&
+            (nextBranch = next.nextHuman()) !== undefined))) {
+
         stack.pop();
         // Kill if this turn is exhausted
         if (next.numRunnersEntered === next.numRunnersRequired) {
@@ -177,21 +176,11 @@ export class Runner {
         }
         next.numRunnersEntered += 1;
         if (next.turnType === TurnType.Branch) {
-          const branch = next.humanBranches.find((branch) => {
-            return branch[0].numRunnersEntered < branch[0].numRunnersRequired;
-          });
-          if (branch !== undefined) {
-            next = branch[0];
-            next.numRunnersEntered += 1;
-            branch.slice(1).reverse().forEach(turn => stack.push(turn));
-          } else {
-            // Kill if no human branches left
-            this.terminateInstance(test);
-            return;
-          }
+          next = nextBranch[0];
+          next.numRunnersEntered += 1;
+          nextBranch.slice(1).reverse().forEach(turn => stack.push(turn));
         }
 
-        // console.log('SENDING', next)
         this.client.send({
           messageType: MessageType.Text,
           user: Runner.getUsername(test),
@@ -201,9 +190,7 @@ export class Runner {
 
       // This applies to both senders/receivers
       if (stack.length === 0) {
-        const numAlive = this.numAlive.get(test.dialogue);
-        this.numAlive.set(test.dialogue, numAlive - 1);
-        this.checkIfComplete(test);
+        this.terminateInstance(test);
       }
     } catch (e) {
       this.onReject(e);
@@ -211,7 +198,6 @@ export class Runner {
   }
 
   private terminateInstance(test: TestMeta) {
-    // console.log('INSTANCE TERMINATED');
     this.numAlive.set(test.dialogue, this.numAlive.get(test.dialogue) - 1);
     this.checkIfComplete(test);
   }
@@ -257,7 +243,7 @@ export class Runner {
       }
     });
 
-    if (this.results.size === this.userMetadata.size) {
+    if (this.results.size === this.dialogues.length) {
       this.done = true;
       this.onComplete(Array.from(this.results.values()));
     }

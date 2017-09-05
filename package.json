@@ -23,6 +23,7 @@
     "find-parent-dir": "^0.3.0",
     "glob": "^7.1.2",
     "js-yaml": "^3.9.1",
+    "semver": "^5.4.1",
     "tslint-config-airbnb": "^5.2.1",
     "xhr2": "^0.1.4"
   },

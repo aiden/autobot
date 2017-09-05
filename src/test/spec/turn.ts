@@ -47,16 +47,15 @@ describe('turn.ts', () => {
   it('should refuse to construct bad branches', () => {
     expect(() => {
       new Turn({
-        Branch: {
-          0: [{
-            Human: 'hello',
+        0: [{
+          Human: 'hello',
 
-          }],
-          1: [{
-            Bot: 'world',
-          }],
-        },
-      });
+        }],
+        1: [{
+          Bot: 'world',
+        }],
+      },
+      );
     }).to.throw(DialogueInvalidError);
   });
 
@@ -68,10 +67,8 @@ describe('turn.ts', () => {
       Bot: 'Hi world',
     }];
     expect(new Turn({
-      Branch: {
-        1: branch1,
-        2: branch2,
-      },
+      1: branch1,
+      2: branch2,
     }).matches('Hello world')).to.deep.equal([new Turn(branch1[0])]);
   });
 
@@ -83,10 +80,8 @@ describe('turn.ts', () => {
       Bot: 'Hi world',
     }];
     expect(new Turn({
-      Branch: {
-        1: branch1,
-        2: branch2,
-      },
+      1: branch1,
+      2: branch2,
     }).matches('Bye world')).to.be.false;
   });
 
@@ -97,13 +92,11 @@ describe('turn.ts', () => {
         'Two',
       ],
     })).to.eql(new Turn({
-      Branch: {
-        1: {
-          Human: 'One',
-        },
-        2: {
-          Human: 'Two',
-        },
+      1: {
+        Human: 'One',
+      },
+      2: {
+        Human: 'Two',
       },
     }));
   });
@@ -121,32 +114,29 @@ describe('turn.ts', () => {
   it('should create the right number of branches for complex cases', () => {
     const turns = Turn.createTurns([
       { Human: 'Hi' },
-      { Branch: {
-        1: [
+      { 1: [
           { Bot: 'Hey' },
-          { Branch: {
-            1: [
+          { 1: [
               { Human: 'How are you?' },
               { Bot: 'I am good' },
             ],
             2: [
               { Bot: 'Is your day well?' },
             ],
-          }},
+          },
         ],
         2: [
           { Human: 'Hello' },
         ],
-      }},
+      },
       { Bot: 'Do you need assistance?' },
-      { Branch: {
-        1: {
+      { 1: {
           Human: 'Yes',
         },
         2: {
           Human: 'No',
         },
-      }},
+      },
       { Bot: 'Ok' },
     ]);
     expect(turns[0].numRunnersRequired).to.equal(3);
@@ -178,11 +168,9 @@ describe('turn.ts', () => {
 
   it('branches should not match when numRunners is exceeded', () => {
     const turn = new Turn({
-      Branch: {
-        1: [
-          { Bot: 'Hello' },
-        ],
-      },
+      1: [
+        { Bot: 'Hello' },
+      ],
     });
     expect(turn.matches('Hello')).to.have.length(1);
     turn.botBranches[0][0].numRunnersEntered += 1;

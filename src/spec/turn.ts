@@ -27,12 +27,12 @@ export class Turn {
     } else if (turnData.Bot) {
       this.turnType = TurnType.Bot;
       data = turnData.Bot;
-    } else if (turnData.Branch) {
+    } else if (turnData['1']) {
       this.turnType = TurnType.Branch;
-      data = turnData.Branch;
+      data = turnData;
     } else {
       throw new DialogueInvalidError(
-        `No Human, Bot, or Branch key on ${JSON.stringify(turnData)}`);
+        `No Human, Bot, or Branching keys on ${JSON.stringify(turnData)}`);
     }
 
     // Force data into array for Human and Bot
@@ -99,6 +99,7 @@ export class Turn {
   static createTurns(turnsData: any): Turn[] {
     const turnsArrayData = (turnsData instanceof Array) ? turnsData : [turnsData];
     return turnsArrayData
+      .slice()
       .reverse()
       .reduce(
         (turns, turnData) => {
@@ -144,6 +145,19 @@ export class Turn {
     }
   }
 
+  /* Returns the next branch with a remaining human response
+   * */
+  nextHuman(): Turn[] {
+    if (!(this.turnType === TurnType.Branch)) {
+      throw new Error('can only get nextHuman for Branch turns');
+    }
+    return this.humanBranches
+      .find((branch) => {
+        return branch[0].numRunnersEntered < branch[0].numRunnersRequired;
+      });
+
+  }
+
   // Used for debugging
   toMatchArray(): string[] {
     switch (this.turnType) {
@@ -153,7 +167,7 @@ export class Turn {
         return this.botBranches
           .map(branch => branch[0].toString());
       default:
-        throw new Error(`cannot have match array for Human`)
+        throw new Error('cannot have match array for Human');
     }
   }
 }

@@ -4,8 +4,7 @@ Dialogue:
   - Bot:
     - How are you?
     - Good day!
-  - Branch:
-      1:
-        - Bot: Hey
-      2:
-        - Human: Hello
+  - 1:
+      - Bot: Hey
+    2:
+      - Human: Hello

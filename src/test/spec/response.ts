@@ -32,4 +32,7 @@ describe('response.ts', () => {
   it('should be a contains match', () => {
     expect(new Response('up').matches('whatsup')).to.be.true;
   });
+  it('should support unicode matches', () => {
+    expect(new Response('✓').matches('✓')).to.be.true;
+  })
 });

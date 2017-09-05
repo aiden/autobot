@@ -12,6 +12,7 @@ import * as fs from 'fs';
 import * as program from 'commander';
 import * as chalk from 'chalk';
 import * as findParentDir from 'find-parent-dir';
+import * as semver from 'semver';
 import 'source-map-support/register';
 
 let chatPath: string = null;

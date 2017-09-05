@@ -1,0 +1,19 @@
+Title: "branching"
+Dialogue:
+  - Human: Hello
+  - 1:
+      - Bot: Howdy
+      - Human: Are you a cowboy?
+      - 1:
+          - Bot: Yes
+          - Human: Really?
+        2:
+          - Bot: No
+          - Human: I didn't think so...
+    2:
+      Human: How are you?
+  - Human: Can you assist me?
+  - 1:
+      Bot: Ok
+    2:
+      Bot: No
