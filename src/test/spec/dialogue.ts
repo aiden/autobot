@@ -21,6 +21,9 @@ describe('dialogue.ts', () => {
     );
     expect(dialogue.title).to.equal('Greetings');
     expect(dialogue.turns).to.be.an('array').that.has.length(3);
+    dialogue.turns.forEach((turn) => {
+      turn.numRunnersRequired = 1;
+    });
     expect(dialogue.turns[0]).to.deep.equals(new Turn({
       Human: 'Hey there',
     }));

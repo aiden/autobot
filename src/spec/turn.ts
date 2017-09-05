@@ -9,37 +9,54 @@ export enum TurnType {
 export class Turn {
   turnType: TurnType;
   responses: Response[];
-  queries: string[];
-  humanBranches: Turn[][];
-  botBranches: Turn[][];
+  query: string;
+  humanBranches: Turn[][] = [];
+  botBranches: Turn[][] = [];
+  numRunnersRequired: number;
+  numRunnersEntered = 0;
 
-  constructor(turnData: any) {
+  constructor(turnData: any, next?: Turn) {
     let data;
-    if (turnData.Human || turnData.Bot) {
-      if (turnData.Human) {
+    let transformedData;
+    // Transform Human turnData into Branch if multiple
+    if (turnData.Human instanceof Array) {
+      transformedData = {
+        Branch: turnData.Human.reduce(
+          (branchData, response, i) => {
+            branchData[i + 1] = [{ Human: response }];
+            return branchData;
+          },
+          {}),
+      };
+    } else {
+      transformedData = turnData;
+    }
+    if (transformedData.Human || transformedData.Bot) {
+      if (transformedData.Human) {
         this.turnType = TurnType.Human;
-        data = turnData.Human;
-      } else if (turnData.Bot) {
+        data = transformedData.Human;
+      } else if (transformedData.Bot) {
         this.turnType = TurnType.Bot;
-        data = turnData.Bot;
+        data = transformedData.Bot;
       }
       if (typeof data === 'string') {
         data = [data];
       }
-      if (turnData.Human) {
-        this.queries = data;
+      if (transformedData.Human) {
+        this.query = data;
       } else {
         this.responses = data.map(responseData => new Response(responseData));
       }
-    } else if (turnData.Branch) {
+    } else if (transformedData.Branch) {
       this.turnType = TurnType.Branch;
-      data = turnData.Branch;
+      data = transformedData.Branch;
 
       const numBranches = Object.keys(data).length;
       const branches: Turn[][] = [...Array(numBranches)]
         .map((_, i) => data[i + 1])
-        .filter(x => x && x instanceof Array)
-        .map(x => x.map(y => new Turn(y)));
+        .filter(x => x)
+        .map(branch => Turn.createTurns(branch));
+
       if (branches.length !== numBranches) {
         throw new DialogueInvalidError(
           `Branch numbers do not go from 1 to ${numBranches}: ${JSON.stringify(data)}`);
@@ -47,8 +64,33 @@ export class Turn {
       this.humanBranches = branches.filter(branch => branch[0].turnType === TurnType.Human);
       this.botBranches = branches.filter(branch => branch[0].turnType === TurnType.Bot);
     } else {
-      throw new DialogueInvalidError(`No Human, Bot, or Branch key on ${JSON.stringify(turnData)}`);
+      throw new DialogueInvalidError(
+        `No Human, Bot, or Branch key on ${JSON.stringify(transformedData)}`);
     }
+
+    this.numRunnersRequired = Math.max(
+      this.humanBranches.concat(this.botBranches)
+        .map(branch => branch[0].numRunnersRequired)
+        .reduce(
+          (totalRequired, numRequired) => {
+            return totalRequired + numRequired;
+          },
+          0),
+      next ? next.numRunnersRequired : 1,
+    );
+  }
+
+  static createTurns(turnsData: any): Turn[] {
+    const turnsArrayData = (turnsData instanceof Array) ? turnsData : [turnsData];
+    return turnsArrayData
+      .reverse()
+      .reduce(
+        (turns, turnData) => {
+          turns.push(new Turn(turnData, turns[turns.length - 1]));
+          return turns;
+        },
+        [])
+      .reverse();
   }
   
   /** Tests if this phrase matches this turn.
@@ -71,7 +113,7 @@ export class Turn {
       });
       return matchingBranch ? matchingBranch : false;
     } else {
-      return false;
+      throw new Error('matches() should not be called for Human branches');
     }
   }
 
@@ -80,7 +122,7 @@ export class Turn {
       case TurnType.Bot:
         return this.responses.map(response => response.original).join(' | ');
       case TurnType.Human:
-        return this.queries.join(' | ');
+        return this.query;
       case TurnType.Branch:
         return this.botBranches.concat(this.humanBranches)
           .map(branch => branch[0].toString()).join(' | ');

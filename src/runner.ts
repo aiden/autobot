@@ -135,7 +135,7 @@ export class Runner {
         this.client.send({
           messageType: MessageType.Text,
           user: Runner.getUsername(test),
-          text: turn.queries[0],
+          text: turn.query[0],
         });
         stack.shift();
       }

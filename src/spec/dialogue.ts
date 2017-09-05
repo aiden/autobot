@@ -32,6 +32,6 @@ export class Dialogue {
       throw new DialogueInvalidError('Dialogue lines must start with dashes');
     }
 
-    this.turns = dialogueDoc.Dialogue.map(turnData => new Turn(turnData));
+    this.turns = Turn.createTurns(dialogueDoc.Dialogue);
   }
 }

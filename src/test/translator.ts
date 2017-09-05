@@ -3,7 +3,7 @@ import { Translator } from '../translator';
 import * as path from 'path';
 
 function getLocalePath(localeName: string): string {
-  return path.join(__dirname, '..', '..', 'src', 'test', 'locale', localeName);
+  return path.join(__dirname, '..', '..', 'locale', localeName);
 }
 
 describe('translator.ts', () => {

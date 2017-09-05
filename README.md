@@ -40,7 +40,7 @@ $ npm run build
 ```
 Title: Greetings
 Dialogue:
-	- Human: Hey bot, how are you?
+  - Human: Hey bot, how are you?
   - Bot:
     - Hi <*>, I'm great thanks
     - Feeling odd, might be some bugs
@@ -48,19 +48,19 @@ Dialogue:
   - Bot: The date today is the <NUMBER><(st|nd|th)> <WORD> <NUMBER>
   - Human: Can you show me a picture of a cat?
   - Branch:
-  	1:
-    	- Bot: There are no pictures sorry
+    1:
+      - Bot: There are no pictures sorry
     2:
-    	- Bot: Here you go
+      - Bot: Here you go
       - Bot: <IMAGE>
       - Bot:
-      	- Would you like to see more?
+        - Would you like to see more?
         - Want another one?
       - Branch:
-      		1:
-      			Human: Yes please
+          1:
+            - Human: Yes please
           2:
-          	Human: No thanks
+            - Human: No thanks
 ```
 
 ### Specifying a chat file or directory

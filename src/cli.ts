@@ -11,6 +11,7 @@ import * as jsYaml from 'js-yaml';
 import * as fs from 'fs';
 import * as program from 'commander';
 import * as chalk from 'chalk';
+import 'source-map-support/register';
 
 let chatPath: string = null;
 
@@ -40,9 +41,10 @@ if (config.client === ClientType.BotFramework) {
 const runner = new Runner(client, chatPath, config);
 let success;
 
-const start = new Date().getTime();
 let finalResults: TestResult[];
+let start;
 runner.start(() => {
+  start = new Date().getTime();
   console.log(chalk.green(`\n\tDiscovered ${runner.dialogues.length} tests `) +
               `(${runner.userMetadata.size} branches)\n`);
 }).then((results) => {
@@ -50,7 +52,8 @@ runner.start(() => {
   results.forEach((result) => {
     const chalkFn = result.passed ? chalk.green : chalk.red;
     console.log(
-      chalkFn(`\t${result.passed ? '✓' : '✗'} ${result.test.dialogue.title}: ${result.passed ? 'Passed' : 'Failed'}`));
+      chalkFn(`\t${result.passed ? '✓' : '✗'} ${result.test.dialogue.title}` +
+        `: ${result.passed ? 'Passed' : 'Failed'}`));
   });
   success = !results.some(result => !result.passed);
 }).catch((err) => {
@@ -61,8 +64,7 @@ runner.start(() => {
 
   finalResults.filter(result => !result.passed).forEach((failedResult) => {
     console.log(chalk.red(`\t${failedResult.test.dialogue.title}`));
-    console.log(`${failedResult.errorMessage}`);
-    console.log('\n')
+    console.log(`${failedResult.errorMessage}\n`);
   });
 
   const nSuccess = finalResults.filter(result => result.passed).length;
