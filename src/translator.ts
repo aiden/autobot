@@ -8,7 +8,7 @@ const translateLuis = /%\(.+?\)/g;
 export class Translator {
   private static translations: Map<string, string[]>;
 
-  static loadTranslation(translationFiles: string[], isLuisLocale: boolean) {
+  static loadTranslation(translationFiles: string[], isLuisLocale?: boolean) {
     Translator.translations = translationFiles
       .map(filePath => JSON.parse(fs.readFileSync(filePath, 'utf8')))
       .reduce(

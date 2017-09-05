@@ -43,11 +43,8 @@ describe('runner.ts', () => {
       0);
 
     return runner.start().then((results) => {
-      results.forEach((testResult) => {
-        expect(testResult.passed).to.be.true;
-      });
-    }).catch((reason) => {
-      expect.fail(reason);
+      const testResult = results[0];
+      expect(testResult.passed).to.be.true;
     });
   });
 
@@ -58,12 +55,50 @@ describe('runner.ts', () => {
       getDialoguePath('simple/simple.yml'),
       Object.assign({}, defaultConfig, { timeout: 5 }));
     return runner.start().then((results) => {
-      results.forEach((testResult) => {
-        expect(testResult.passed).to.be.false;
-        expect(testResult.errorMessage).to.contain('timeout');
-      });
-    }).catch((reason) => {
-      expect.fail(reason);
+      const testResult = results[0];
+      expect(testResult.passed).to.be.false;
+      expect(testResult.errorMessage).to.contain('timeout');
     });
   });
+
+  it('should fail a simple conversation if not matching', () => {
+    const client = new MockClient();
+    const runner = new Runner(client, getDialoguePath('simple/simple.yml'), defaultConfig);
+    setTimeout(
+      () => {
+        const username = Runner.getUsername({
+          branchNumber: 0,
+          dialogue: new Dialogue(getDialoguePath('simple/simple.yml')),
+          lastMessage: 0,
+        });
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'Bye',
+          user: username,
+        });
+      },
+      0);
+
+    return runner.start().then((results) => {
+      const testResult = results[0];
+      expect(testResult.passed).to.be.false;
+      expect(testResult.errorMessage)
+        .to.contain('Expected:')
+        .and.to.contain('Got:')
+        .and.to.contain('Hi')
+        .and.to.contain('Hello')
+        .and.to.contain('Bye');
+    });
+  });
+
+  // it('should handle branching conversations correctly', () => {
+  // });
+  //
+  // it('should short-circuit a failing branching conversation', () => {
+  //
+  // });
+  //
+  // it('should fail a branching conversation if one branch fails', () => {
+  //
+  // });
 });

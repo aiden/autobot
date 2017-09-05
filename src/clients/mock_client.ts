@@ -1,7 +1,7 @@
 import { Client } from './client_interface';
 import { Message } from '../spec/message';
 
-export class MockClient implements Client {
+export class MockClient extends Client {
   private received = new Map<string, string[]>();
   private cb: (message: Message) => void;
 
@@ -14,17 +14,8 @@ export class MockClient implements Client {
     messageQueue.push(message.text);
   }
 
-  subscribeToReplies(callback: (message: Message) => void) {
+  onReply(callback: (message: Message) => void) {
     this.cb = callback;
-  }
-
-  close() {
-  }
-
-  onReady() {
-    return new Promise<void>((resolve) => {
-      resolve();
-    });
   }
 
   read(user: string): string {

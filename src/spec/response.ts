@@ -16,7 +16,7 @@ export class Response {
     this.original = trimmedData;
     this.responseType = (trimmedData === '<IMAGE>') ? MessageType.Image : MessageType.Text;
     if (this.responseType === MessageType.Text) {
-      this.textMatchChecker = new RegExp(Response.transformTags(trimmedData));
+      this.textMatchChecker = new RegExp(Response.transformTags(trimmedData), 'u');
     }
   }
 
@@ -49,7 +49,7 @@ export class Response {
       outText = outText.replace(escapedVersion, regexString);
     });
 
-    return '^' + outText + '$';
+    return outText;
   }
   static escapeRegex(text: string): string {
     return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');

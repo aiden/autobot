@@ -11,14 +11,15 @@ bot-e2e is a bot testing framework designed for humans. We built this with the f
 
 The core features of this framework are:
 
-- Connector with Bot Framework, and a single simple interface to implement to add connectors to new bots.
+- Bot platform agnostic. Existing connector with Bot Framework, and tiny interface to add new ones (only `send(message)` and `onReceive`)
 - Human readable/writable YAML dialogue files
 - Parallel execution of tests
 - Wildcard matching (<NUMBER>, <WORD>, <\*>)
 - Support for regular expressions (<(st|nt|nd)>)
-- Multiple requests/responses
+- Test on set of acceptable responses
 - Show diffs on error
 - Conversation branches
+- Full unicode support
 
 ## Install
 

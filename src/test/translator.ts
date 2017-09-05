@@ -2,32 +2,32 @@ import { expect } from 'chai';
 import { Translator } from '../translator';
 import * as path from 'path';
 
-function getLocalePath(localeName: string): string {
+export function getLocalePath(localeName: string): string {
   return path.join(__dirname, '..', '..', 'locale', localeName);
 }
 
 describe('translator.ts', () => {
   it('should refuse to load a bad json file', () => {
     expect(() => {
-      Translator.loadTranslation([getLocalePath('bad_locale.json')], null);
+      Translator.loadTranslation([getLocalePath('bad_locale.json')]);
     }).to.throw(/locale file must contain string or array values/);
   });
 
   it('should throw error on missing identifier', () => {
-    Translator.loadTranslation([getLocalePath('locale1.json')], null);
+    Translator.loadTranslation([getLocalePath('locale1.json')]);
     expect(() => {
       Translator.translate('Phrase with <$missing_identifier>');
     }).to.throw(/Missing locale entry for \$missing_identifier/);
   });
 
   it('should translate simply', () => {
-    Translator.loadTranslation([getLocalePath('locale1.json')], null);
+    Translator.loadTranslation([getLocalePath('locale1.json')]);
     expect(Translator.translate('<$hey>, what\'s up?'))
       .to.eql(['hello, what\'s up?']);
   });
 
   it('should do multiple translation', () => {
-    Translator.loadTranslation([getLocalePath('locale1.json')], null);
+    Translator.loadTranslation([getLocalePath('locale1.json')]);
     expect(Translator.translate('<$hey> <$yo>')).to.eql([
       'hello what\'s up?',
     ]);
@@ -36,8 +36,7 @@ describe('translator.ts', () => {
   it('should merge multiple translation files', () => {
     Translator.loadTranslation(
       [getLocalePath('locale1.json'),
-        getLocalePath('locale2.json')],
-      null);
+        getLocalePath('locale2.json')]);
     expect(Translator.translate('hi <$friend>'))
       .to.have.members([
         'hi buddy',
@@ -51,7 +50,7 @@ describe('translator.ts', () => {
   });
 
   it('should cross-product translations', () => {
-    Translator.loadTranslation([getLocalePath('locale1.json')], null);
+    Translator.loadTranslation([getLocalePath('locale1.json')]);
     expect(Translator.translate('<$hey> <$cool> <$friend>')).to.have.members([
       'hello neat amigo',
       'hello fun amigo',
@@ -61,7 +60,7 @@ describe('translator.ts', () => {
   });
 
   it('should translate the same identifier multiple times', () => {
-    Translator.loadTranslation([getLocalePath('locale1.json')], null);
+    Translator.loadTranslation([getLocalePath('locale1.json')]);
     expect(Translator.translate('<$hey> <$hey>')).to.eql(['hello hello']);
   });
 

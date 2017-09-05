@@ -13,13 +13,14 @@ import { Message, MessageType } from '../spec/message';
 const globalAny:any = global;
 globalAny.XMLHttpRequest = require('xhr2');
 
-export class BotFrameworkClient implements Client {
+export class BotFrameworkClient extends Client {
   private conectionStatus: ConnectionStatus;
   private directLine: DirectLine;
   private messageIdToUser = new Map<string, string>();
   private onReadyCb: () => void;
 
   constructor(directLineSecret: string) {
+    super();
     this.directLine = new DirectLine({ secret: directLineSecret });
     this.subscribeToConnectionStatus();
   }
@@ -39,17 +40,7 @@ export class BotFrameworkClient implements Client {
     );
   }
 
-  onReady() {
-    return new Promise<void>((resolve) => {
-      if (this.conectionStatus === ConnectionStatus.Online) {
-        resolve();
-      } else {
-        this.onReadyCb = resolve;
-      }
-    });
-  }
-
-  public subscribeToReplies(callback: (message: Message) => void) {
+  public onReply(callback: (message: Message) => void) {
     this.directLine.activity$
     .filter(activity => activity.type === 'message')
     .subscribe((dlMessage: any) => {
@@ -70,6 +61,16 @@ export class BotFrameworkClient implements Client {
           text: dlMessage.text,
         };
         callback(message);
+      }
+    });
+  }
+
+  onReady() {
+    return new Promise<void>((resolve) => {
+      if (this.conectionStatus === ConnectionStatus.Online) {
+        resolve();
+      } else {
+        this.onReadyCb = resolve;
       }
     });
   }

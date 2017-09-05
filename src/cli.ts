@@ -11,12 +11,15 @@ import * as jsYaml from 'js-yaml';
 import * as fs from 'fs';
 import * as program from 'commander';
 import * as chalk from 'chalk';
+import * as findParentDir from 'find-parent-dir';
 import 'source-map-support/register';
 
 let chatPath: string = null;
 
 program
   .version('0.1.0')
+  .option('-v', '--verbose', 'Enable full logging including bot queries and responses')
+  .option('-c', '--config', 'e2e-test.yml config file to use')
   .arguments('<chatPath>')
   .action((chatPathVal) => {
     chatPath = chatPathVal;
@@ -25,10 +28,26 @@ program
 console.log('');
 
 
+let configPath;
+if (program.config) {
+  configPath = program.config;
+} else {
+  configPath = findParentDir.sync(process.cwd(), 'bot-e2e.yml');
+}
+
+if (!fs.existsSync(configPath)) {
+  if (configPath) {
+    console.log(chalk.red(`Cannot find file ${configPath}`));
+  } else {
+    console.log(
+      chalk.red(`Unable to discover bot-e2e.yml config file in this or parent directories`));
+  }
+}
+
 const config: Config = Object.assign(
   {},
   defaultConfig,
-  jsYaml.safeLoad(fs.readFileSync('./config.yml', 'utf8')));
+  jsYaml.safeLoad(fs.readFileSync(configPath, 'utf8')));
 let client: Client;
 
 if (config.client === ClientType.BotFramework) {
@@ -52,7 +71,7 @@ runner.start(() => {
   results.forEach((result) => {
     const chalkFn = result.passed ? chalk.green : chalk.red;
     console.log(
-      chalkFn(`\t${result.passed ? '✓' : '✗'} ${result.test.dialogue.title}` +
+      chalkFn(`\t${result.passed ? '✓' : '✗'} ${result.dialogue.title}` +
         `: ${result.passed ? 'Passed' : 'Failed'}`));
   });
   success = !results.some(result => !result.passed);
@@ -63,7 +82,7 @@ runner.start(() => {
   console.log('');
 
   finalResults.filter(result => !result.passed).forEach((failedResult) => {
-    console.log(chalk.red(`\t${failedResult.test.dialogue.title}`));
+    console.log(chalk.red(`\t${failedResult.dialogue.title}`));
     console.log(`${failedResult.errorMessage}\n`);
   });
 

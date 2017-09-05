@@ -1,6 +1,8 @@
 import { expect } from 'chai';
 import { Turn } from '../../spec/turn';
 import { DialogueInvalidError } from '../../spec/dialogue_invalid_error';
+import { getLocalePath } from '../translator';
+import { Translator } from '../../translator';
 
 describe('turn.ts', () => {
   it('should not construct empty turns', () => {
@@ -156,5 +158,34 @@ describe('turn.ts', () => {
     expect(turns[2].numRunnersRequired).to.equal(2);
     expect(turns[3].numRunnersRequired).to.equal(2);
     expect(turns[4].numRunnersRequired).to.equal(1);
+  });
+
+  it('should invoke the translator to multiply responses', () => {
+    Translator.loadTranslation([getLocalePath('locale1.json')]);
+    expect(new Turn({
+      Human: [
+        'Hello <$friend>',
+        'Hey',
+      ],
+    })).to.eql(new Turn({
+      Human: [
+        'Hello amigo',
+        'Hello mate',
+        'Hey',
+      ],
+    }));
+  });
+
+  it('branches should not match when numRunners is exceeded', () => {
+    const turn = new Turn({
+      Branch: {
+        1: [
+          { Bot: 'Hello' },
+        ],
+      },
+    });
+    expect(turn.matches('Hello')).to.have.length(1);
+    turn.botBranches[0][0].numRunnersEntered += 1;
+    expect(turn.matches('Hello')).to.eql([]);
   });
 });

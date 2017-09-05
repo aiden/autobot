@@ -11,7 +11,7 @@ import * as glob from 'glob';
 import * as path from 'path';
 
 export interface TestResult {
-  test: TestMeta;
+  dialogue: Dialogue;
   passed: boolean;
   errorMessage: string;
 };
@@ -26,7 +26,8 @@ export class Runner {
   private client: Client;
   dialogues: Dialogue[];
   userMetadata = new Map<string, TestMeta>();
-  private results = new Map<TestMeta, TestResult>();
+  private numAlive = new Map<Dialogue, number>();
+  private results = new Map<Dialogue, TestResult>();
   private stacks = new Map<TestMeta, Turn[]>();
   private onComplete: (results: TestResult[]) => void;
   private onReject: (e: Error) => void;
@@ -55,17 +56,21 @@ export class Runner {
     }
     this.dialogues.forEach((dialogue) => {
       // Create a test user per dialogue branch
-      const testMeta: TestMeta = {
-        dialogue,
-        branchNumber: 0,
-        lastMessage: new Date().getTime(),
-      };
-      this.userMetadata.set(Runner.getUsername(testMeta), testMeta);
+      const numRunnersRequired = dialogue.turns[0].numRunnersRequired;
+      this.numAlive.set(dialogue, numRunnersRequired);
+      [...Array(numRunnersRequired)].forEach((_, i) => {
+        const testMeta: TestMeta = {
+          dialogue,
+          branchNumber: i,
+          lastMessage: new Date().getTime(),
+        };
+        this.userMetadata.set(Runner.getUsername(testMeta), testMeta);
+      });
     });
-    this.client.subscribeToReplies((message: Message) => {
+    this.client.onReply((message: Message) => {
       const test = this.userMetadata.get(message.user);
       test.lastMessage = new Date().getTime();
-      if (this.results.has(test)) {
+      if (this.results.has(test.dialogue)) {
         // Short circuit as this test is already done
         return;
       }
@@ -88,11 +93,11 @@ export class Runner {
         this.userMetadata.forEach((test, username) => {
           const stack: Turn[] = [];
           if (this.preamble) {
-            this.preamble.forEach((turn) => {
+            this.preamble.reverse().forEach((turn) => {
               stack.push(turn);
             });
           }
-          test.dialogue.turns.forEach((turn) => {
+          test.dialogue.turns.reverse().forEach((turn) => {
             stack.push(turn);
           });
           this.stacks.set(test, stack);
@@ -114,45 +119,108 @@ export class Runner {
     try {
       // It is only null on the first execution
       const stack = this.stacks.get(test);
+      // console.log('TURN', stack[stack.length - 1], response);
       if (response !== null) {
-        const expected = stack[0];
-        if (!expected.matches(response.text)) {
-          this.results.set(test, {
-            test,
-            passed: false,
-            errorMessage: `\t\tExpected: ${expected.toString()}\n\t\tGot: ${response.text}`,
-          });
-          this.checkIfComplete();
+        const nextBot = stack.pop();
+        if (nextBot.numRunnersEntered === nextBot.numRunnersRequired) {
+          // Kill this instance if exhausted
+          // console.log('TERMINATING FOR EXHAUSTED TURN');
+          this.terminateInstance(test);
           return;
         }
-        stack.shift();
+        nextBot.numRunnersEntered += 1;
+        const match = nextBot.matches(response.text);
+        if (!match) {
+          let expected;
+          const matchArray = nextBot.toMatchArray();
+          if (matchArray.length > 1) {
+            expected = matchArray.map(str => `\t\t- ${str}`).join();
+          } else {
+            expected = `\t\t${matchArray[0]}`;
+          }
+
+          // console.log('FAILING')
+          this.results.set(test.dialogue, {
+            dialogue: test.dialogue,
+            passed: false,
+            errorMessage: `\tExpected:\n${expected}` +
+                          `\n\tGot:\n\t\t${response.text}`,
+          });
+          this.terminateInstance(test);
+          return;
+        }
+        if (match instanceof Array) {
+          // Means it matched an exhausted branch, terminate this runner
+          if (match.length === 0) {
+            // console.log('TERMINATING FOR EXHAUSTED BRANCHES');
+            this.terminateInstance(test);
+            return;
+          }
+
+          // Means we have entered a bot branch
+          match[0].numRunnersEntered += 1;
+          match.slice(1).reverse().forEach((turn) => {
+            stack.push(turn);
+          });
+        }
       }
+
       let next: Turn;
       while (stack.length > 0 &&
-          ((next = stack[0]).turnType === TurnType.Human ||
+          ((next = stack[stack.length - 1]).turnType === TurnType.Human ||
           (next.turnType === TurnType.Branch && next.humanBranches.length > 0))) {
-        const turn = next.turnType === TurnType.Human ? next : next.humanBranches[0][0];
+        stack.pop();
+        // Kill if this turn is exhausted
+        if (next.numRunnersEntered === next.numRunnersRequired) {
+          this.terminateInstance(test);
+          return;
+        }
+        next.numRunnersEntered += 1;
+        if (next.turnType === TurnType.Branch) {
+          const branch = next.humanBranches.find((branch) => {
+            return branch[0].numRunnersEntered < branch[0].numRunnersRequired;
+          });
+          if (branch !== undefined) {
+            next = branch[0];
+            next.numRunnersEntered += 1;
+            branch.slice(1).reverse().forEach(turn => stack.push(turn));
+          } else {
+            // Kill if no human branches left
+            this.terminateInstance(test);
+            return;
+          }
+        }
+
+        // console.log('SENDING', next)
         this.client.send({
           messageType: MessageType.Text,
           user: Runner.getUsername(test),
-          text: turn.query[0],
+          text: next.query,
         });
-        stack.shift();
       }
+
+      // This applies to both senders/receivers
       if (stack.length === 0) {
-        this.results.set(test, {
-          test,
-          passed: true,
-          errorMessage: null,
-        });
-        this.checkIfComplete();
+        const numAlive = this.numAlive.get(test.dialogue);
+        this.numAlive.set(test.dialogue, numAlive - 1);
+        this.checkIfComplete(test);
       }
     } catch (e) {
       this.onReject(e);
     }
   }
 
-  private checkIfComplete = () => {
+  private terminateInstance(test: TestMeta) {
+    // console.log('INSTANCE TERMINATED');
+    this.numAlive.set(test.dialogue, this.numAlive.get(test.dialogue) - 1);
+    this.checkIfComplete(test);
+  }
+
+  /* Checks if we are done. Optionally takes a test parameter
+   * so that the checks only are performed on this one for
+   * optimization reasons
+   * */
+  private checkIfComplete = (test?: TestMeta) => {
     if (this.done) {
       // Previously called
       return;
@@ -160,11 +228,29 @@ export class Runner {
 
     const now = new Date().getTime();
 
-    this.userMetadata.forEach((test) => {
-      if (!this.results.has(test) && (now - test.lastMessage > this.config.timeout)) {
+    const dialogues = test ? [test.dialogue] : this.dialogues;
+
+    // see if we can cleanup any tests
+    dialogues
+      .filter(dialogue => !this.results.has(dialogue))
+      .forEach((dialogue) => {
+        const numAlive = this.numAlive.get(dialogue);
+        if (numAlive === 0) {
+          this.results.set(dialogue, {
+            dialogue,
+            passed: true,
+            errorMessage: null,
+          });
+        }
+      });
+    
+    const tests = test ? [test] : Array.from(this.userMetadata.values());
+
+    tests.forEach((test) => {
+      if (!this.results.has(test.dialogue) && (now - test.lastMessage > this.config.timeout)) {
         const stack = this.stacks.get(test);
-        this.results.set(test, {
-          test,
+        this.results.set(test.dialogue, {
+          dialogue: test.dialogue,
           passed: false,
           errorMessage: `timeout waiting on ${stack[stack.length - 1].toString()}`,
         });
