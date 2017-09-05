@@ -38,8 +38,9 @@ export class Runner {
   constructor(client: Client, dialoguePath: string, config: Config) {
     this.client = client;
     this.config = config;
+
     if (this.config.preamble) {
-      this.preamble = this.config.preamble.map(turnData => new Turn(turnData));
+      this.preamble = Turn.createTurns(this.config.preamble).slice();
     }
 
     const dialogueFileInfo = fs.lstatSync(dialoguePath);
@@ -47,7 +48,8 @@ export class Runner {
       this.dialogues = glob.sync('*.yml', {
         cwd: dialoguePath,
         matchBase: true,
-      }).filter(filepath => path.basename(filepath) !== 'config.yml')
+      }).map(filepath => path.join(dialoguePath, filepath))
+        .filter(filepath => path.basename(filepath) !== 'bot-e2e.yml')
         .map(filepath => new Dialogue(filepath));
     } else if (dialogueFileInfo.isFile()) {
       this.dialogues = [new Dialogue(dialoguePath)];
@@ -92,14 +94,14 @@ export class Runner {
         }
         this.userMetadata.forEach((test, username) => {
           const stack: Turn[] = [];
+          test.dialogue.turns.slice().reverse().forEach((turn) => {
+            stack.push(turn);
+          });
           if (this.preamble) {
             this.preamble.slice().reverse().forEach((turn) => {
               stack.push(turn);
             });
           }
-          test.dialogue.turns.slice().reverse().forEach((turn) => {
-            stack.push(turn);
-          });
           this.stacks.set(test, stack);
           this.executeTurn(test, null);
         });
@@ -110,7 +112,6 @@ export class Runner {
           }
         };
         setTimeout(intervalCheckIfDone, this.config.timeout / 2);
-
       });
     });
   }

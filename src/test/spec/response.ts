@@ -34,5 +34,5 @@ describe('response.ts', () => {
   });
   it('should support unicode matches', () => {
     expect(new Response('✓').matches('✓')).to.be.true;
-  })
+  });
 });

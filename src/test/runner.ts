@@ -4,7 +4,10 @@ import { MockClient } from '../clients/mock_client';
 import { defaultConfig } from '../config';
 import { Dialogue } from '../spec/dialogue';
 import { MessageType } from '../spec/message';
+
+import * as fs from 'fs';
 import * as path from 'path';
+import * as jsYaml from 'js-yaml';
 
 function getDialoguePath(dialogueName: string): string {
   return path.join(__dirname, '..', '..', 'dialogues', dialogueName);
@@ -13,12 +16,12 @@ function getDialoguePath(dialogueName: string): string {
 describe('runner.ts', () => {
   it('should run a simple conversation from a file', () => {
     const client = new MockClient();
-    const runner = new Runner(client, getDialoguePath('simple.yml'), defaultConfig);
+    const runner = new Runner(client, getDialoguePath('examples/simple.yml'), defaultConfig);
     setTimeout(
       () => {
         const username = Runner.getUsername({
           branchNumber: 0,
-          dialogue: new Dialogue(getDialoguePath('simple.yml')),
+          dialogue: new Dialogue(getDialoguePath('examples/simple.yml')),
           lastMessage: 0,
         });
         expect(client.read(username)).to.equal('Hello');
@@ -48,11 +51,25 @@ describe('runner.ts', () => {
     });
   });
 
+  it('should load multiple conversations from a directory', () => {
+    const client = new MockClient();
+    const runner = new Runner(
+      client,
+      getDialoguePath('examples/'),
+      Object.assign({}, defaultConfig, { timeout: 5 }));
+    expect(runner.dialogues).to.have.length(2);
+    expect(runner.dialogues).to.deep.include(
+      new Dialogue(getDialoguePath('examples/simple.yml')),
+    ).and.to.deep.include(
+      new Dialogue(getDialoguePath('examples/branching.yml')),
+    );
+  });
+
   it('should timeout', () => {
     const client = new MockClient();
     const runner = new Runner(
       client,
-      getDialoguePath('simple.yml'),
+      getDialoguePath('examples/simple.yml'),
       Object.assign({}, defaultConfig, { timeout: 5 }));
     return runner.start().then((results) => {
       const testResult = results[0];
@@ -63,12 +80,12 @@ describe('runner.ts', () => {
 
   it('should fail a simple conversation if not matching', () => {
     const client = new MockClient();
-    const runner = new Runner(client, getDialoguePath('simple.yml'), defaultConfig);
+    const runner = new Runner(client, getDialoguePath('examples/simple.yml'), defaultConfig);
     setTimeout(
       () => {
         const username = Runner.getUsername({
           branchNumber: 0,
-          dialogue: new Dialogue(getDialoguePath('simple.yml')),
+          dialogue: new Dialogue(getDialoguePath('examples/simple.yml')),
           lastMessage: 0,
         });
         client.reply({
@@ -93,13 +110,13 @@ describe('runner.ts', () => {
 
   it('should handle branching conversations correctly', () => {
     const client = new MockClient();
-    const runner = new Runner(client, getDialoguePath('branching.yml'), defaultConfig);
+    const runner = new Runner(client, getDialoguePath('examples/branching.yml'), defaultConfig);
     setTimeout(
       () => {
         const users = [...Array(3)].map((_, i) => {
           return Runner.getUsername({
             branchNumber: i,
-            dialogue: new Dialogue(getDialoguePath('branching.yml')),
+            dialogue: new Dialogue(getDialoguePath('examples/branching.yml')),
             lastMessage: 0,
           });
         });
@@ -167,11 +184,116 @@ describe('runner.ts', () => {
     });
   });
 
-  // it('should short-circuit a failing branching conversation', () => {
-  //
-  // });
-  //
-  // it('should fail a branching conversation if one branch fails', () => {
-  //
-  // });
+  it('should short-circuit a failing branching conversation', () => {
+    const client = new MockClient();
+    const runner = new Runner(client, getDialoguePath('examples/branching.yml'), defaultConfig);
+    setTimeout(
+      () => {
+        const users = [...Array(3)].map((_, i) => {
+          return Runner.getUsername({
+            branchNumber: i,
+            dialogue: new Dialogue(getDialoguePath('examples/branching.yml')),
+            lastMessage: 0,
+          });
+        });
+
+        users.forEach((user) => {
+          expect(client.read(user)).to.equal('Hello');
+        });
+
+        expect(client.read(users[0])).to.equal('How are you?');
+        users.slice(1).forEach((user) => {
+          expect(client.read(user)).to.equal(undefined);
+        });
+
+        expect(client.read(users[0])).to.equal('Can you assist me?');
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'Random text',
+          user: users[0],
+        });
+        // user0 fails now
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'Howdy',
+          user: users[1],
+        });
+
+        expect(client.read(users[1])).to.equal(undefined);
+        // user1 shortcircuits
+        
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'Howdy',
+          user: users[2],
+        });
+
+        expect(client.read(users[2])).to.equal(undefined);
+        // user2 shortcircuits
+      },
+      0);
+
+    return runner.start().then((results) => {
+      const testResult = results[0];
+      expect(testResult.passed).to.be.false;
+      expect(testResult.errorMessage).to.contain('Random text');
+      const turns = runner.dialogues[0].turns;
+
+      // Only one runner made it there
+      expect(turns[turns.length - 1].numRunnersEntered).to.equal(1);
+    });
+  });
+  
+  it('should execute the preamble', () => {
+    const client = new MockClient();
+    const runner = new Runner(
+      client,
+      getDialoguePath('examples/simple.yml'),
+      Object.assign(
+        {},
+        defaultConfig,
+        jsYaml.safeLoad(fs.readFileSync(getDialoguePath('bot-e2e.yml'), 'utf8'))),
+      );
+
+    setTimeout(
+      () => {
+        const username = Runner.getUsername({
+          branchNumber: 0,
+          dialogue: new Dialogue(getDialoguePath('examples/simple.yml')),
+          lastMessage: 0,
+        });
+
+        expect(client.read(username)).to.equal('Hi there');
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'Hey',
+          user: username,
+        });
+
+        expect(client.read(username)).to.equal('Hello');
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'Hi',
+          user: username,
+        });
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'How are you?',
+          user: username,
+        });
+        expect(client.read(username)).to.equal('I\'m good');
+        expect(client.read(username)).to.equal('Yourself?');
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'I\'m good too',
+          user: username,
+        });
+      },
+      0);
+
+    return runner.start().then((results) => {
+      const testResult = results[0];
+      expect(testResult.passed).to.be.true;
+    });
+  });
 });
