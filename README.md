@@ -69,6 +69,19 @@ Dialogue:
       Bot: No
 ```
 
+## Special Tags
+
+You can use the following tags in your test dialogue files:
+
+Tag | Meaning
+--- | ---
+`<*>` | Matches anything, including whitespaces
+`<WORD>` | A single word without whitespaces
+`<IMAGE>` | An image attachment
+`<CARDS>` | A card attachment
+`<(REGEX)>` | Any regex expression, i.e. `<([0-9]{2})>`
+`<$VARNAME>` | An expression from the locale/translation file
+
 ## Install
 
 To install from npm
@@ -140,19 +153,6 @@ preamble:
   - Bot: <*>
   - Human: Hi
 ```
-
-## Special Tags
-
-You can use the following tags in your test dialogue files:
-
-Tag | Meaning
---- | ---
-`<*>` | Matches anything, including whitespaces
-`<WORD>` | A single word without whitespaces
-`<IMAGE>` | An image attachment
-`<CARDS>` | A card attachment
-`<(REGEX)>` | Any regex expression, i.e. `<([0-9]{2})>`
-`<$VARNAME>` | An expression from the locale/translation file
 
 ## Extending to a new platforms
 
