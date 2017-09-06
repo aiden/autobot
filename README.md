@@ -2,14 +2,11 @@
 
 [![CircleCI](https://circleci.com/gh/aiden/bot-e2e.svg?style=svg&circle-token=b945b5b109d685a84d3b1d7794c8fd0b2a4f2e0a)](https://circleci.com/gh/aiden/bot-e2e)
 
-bot-e2e is a bot testing framework designed for humans. We built this with the following principles in mind:
+![autobot terminal image](http://i.imgur.com/3pbAl39.png)
 
-- Tests should serve as clear documentation on what the bot does
-- Reading, writing and running tests should be easy and not require technical expertise
-- Testing should be as flexible as the bot itself
-- Tests should be deterministic
+autobot is a multi-platform bot testing framework designed for humans.
 
-The core features of this framework are:
+**Features:**
 
 - Bot platform agnostic. Existing connector with Bot Framework, and tiny interface to add new ones (only `send(message)` and `onReceive`)
 - Human readable/writable YAML dialogue files
@@ -70,7 +67,6 @@ Dialogue:
       Bot: No
 ```
 
-
 ## Install
 
 To install from npm
@@ -127,22 +123,45 @@ $ autobot -v ./path/to/test.yml
   BOT testuser-simple-0: Hi!
 ```
 
-### Specifying a chat file or directory
+## Config File Format
 
-* To run a single chat file, specify the file e.g. `./chats/onboarding.json` to run 1 chat file.
-* To run multiple files, specify a directory e.g. `./chats`
+The config file `autobot.yml` takes the following fields:
 
 ```
-$ env DIRECT_LINE_SECRET=<direct-line-secret>node built/e2e.js --chat-path ./chats/onboarding.json
-
-OR
-
-$ env DIRECT_LINE_SECRET=<direct-line-secret>node built/e2e.js --chat-path ./chats
+client: botframework
+directLineSecret: <SECRET IF USING BOT FRAMEWORK>
+localeFiles:
+  - locale/en/locale.json
+timeout: 20000 (timeout in ms)
+preamble:
+  - Human: Hey there
+  - Bot: <*>
+  - Human: Hi
 ```
 
-Alternatively, use `-c`.
+## Extending to a new platforms
 
-### Direct Line Secret
+autobot is designed to be super simple to integrate a new platform. You only need to implement the `Client` interface
+found in `src/clients/client_interface.ts`, in either javascript or typescript. 
 
-The `DIRECT_LINE_SECRET` can be found in the Bot's setup page [here](https://dev.botframework.com/bots).
-Each bot has a unique secret that needs to be setup explicitly.
+There are only 2 mandatory methods, and 2 optional methods to implement:
+
+```
+export class MyNewClient extends Client {
+  send(message) {
+    // Mandatory
+  }
+
+  onReply(callback) {
+    // Mandatory
+  }
+
+  onReady(callback) {
+    // Optional
+  }
+
+  close() {
+    // Optional
+  }
+}
+```

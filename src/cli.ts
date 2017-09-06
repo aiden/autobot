@@ -78,7 +78,7 @@ if (config.localeFiles) {
   Translator.loadTranslation(
     config.localeFiles
       .map(localePath => path.join(path.dirname(configPath), localePath)),
-    config.luisLocale);
+    config.client === ClientType.BotFramework);
 }
 
 console.log('');

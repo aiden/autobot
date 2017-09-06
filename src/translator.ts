@@ -3,13 +3,13 @@
 import * as fs from 'fs';
 
 const translateRegex = /<\$(.+?)>/;
-const translateLuis = /%\(.+?\)/g;
-const translateLuisPlural = /%\(.+?\)s/g;
+const translateBot = /%\(.+?\)/g;
+const translateBotPlural = /%\(.+?\)s/g;
 
 export class Translator {
   private static translations = new Map<string, string[]>();
 
-  static loadTranslation(translationFiles: string[], isLuisLocale?: boolean) {
+  static loadTranslation(translationFiles: string[], isBotFramework?: boolean) {
     Translator.translations = translationFiles
       .map(filePath => JSON.parse(fs.readFileSync(filePath, 'utf8')))
       .reduce(
@@ -23,9 +23,9 @@ export class Translator {
               throw new Error(`locale file must contain string or array values, got: ${val}`);
             }
 
-            if (isLuisLocale) {
+            if (isBotFramework) {
               val = val.map((localeLine) => {
-                return localeLine.replace(translateLuisPlural, '<*>').replace(translateLuis, '<*>');
+                return localeLine.replace(translateBotPlural, '<*>').replace(translateBot, '<*>');
               });
             }
 
