@@ -8,8 +8,10 @@ autobot is a multi-platform bot testing framework designed for humans.
 
 **Features:**
 
-- Multi-platform support. Comes with botframework, or implement a new connector with only two methods: `send` and `onReceive`.
 - Human readable/writable YAML dialogue files
+- Supports any bot platform.
+  - Comes with connectors for botframework
+  - Implement a new connector with only two methods: `send` and `onReceive`.
 - Parallel execution of tests
 - Test against multiple acceptable answers
 - Wildcard matching (`<NUMBER>`, `<WORD>`, ``<\*>``)
@@ -17,7 +19,7 @@ autobot is a multi-platform bot testing framework designed for humans.
 - Show diffs on error
 - Conversation branches
 - Full unicode support
-- Support for preambles, loading variables from locale/translation files
+- Support for preambles and loading variables from locale/translation files
 
 ## Dialogue Format
 
