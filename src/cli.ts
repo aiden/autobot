@@ -101,7 +101,7 @@ runner.start(() => {
   });
   success = !results.some(result => !result.passed);
 }).catch((err) => {
-  console.log('ERR:', err);
+  console.log(chalk.red(err));
 }).then(() => {
   client.close();
   console.log('');

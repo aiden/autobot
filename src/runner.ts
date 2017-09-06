@@ -44,7 +44,8 @@ export class Runner {
     if (dialogueFileInfo.isDirectory()) {
       this.dialogues = glob.sync('**/*.yml', {
         cwd: dialoguePath,
-      }).map((filepath) =>  {
+      }).map(x => path.join(dialoguePath, x))
+        .map((filepath) =>  {
           try {
             return new Dialogue(filepath, this.config.preamble);
           } catch (e) {
@@ -58,8 +59,7 @@ export class Runner {
         .filter(x => x);
 
       if (this.dialogues.length === 0) {
-        console.log(chalk.red('No test files found on path'));
-        process.exit(1);
+        throw new Error('No test files found on path');
       }
     } else if (dialogueFileInfo.isFile()) {
       this.dialogues = [new Dialogue(dialoguePath, this.config.preamble)];
@@ -107,11 +107,6 @@ export class Runner {
           test.dialogue.turns.slice().reverse().forEach((turn) => {
             stack.push(turn);
           });
-          if (this.preamble) {
-            this.preamble.slice().reverse().forEach((turn) => {
-              stack.push(turn);
-            });
-          }
           this.stacks.set(test, stack);
           this.executeTurn(test, null);
         });
