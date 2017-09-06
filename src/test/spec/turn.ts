@@ -3,6 +3,7 @@ import { Turn } from '../../spec/turn';
 import { DialogueInvalidError } from '../../spec/dialogue_invalid_error';
 import { getLocalePath } from '../translator';
 import { Translator } from '../../translator';
+import { createTextMessage } from './response';
 
 describe('turn.ts', () => {
   it('should not construct empty turns', () => {
@@ -14,13 +15,13 @@ describe('turn.ts', () => {
   it('should match when only one choice', () => {
     expect(new Turn({
       Bot: 'Hello',
-    }).matches('Hello ')).to.be.true;
+    }).matches(createTextMessage('Hello '))).to.be.true;
   });
 
   it('should not match when only one incorrect choice', () => {
     expect(new Turn({
       Bot: 'Hello',
-    }).matches('bye ')).to.be.false;
+    }).matches(createTextMessage('bye '))).to.be.false;
   });
   
   it('should match when one of multiple is correct', () => {
@@ -30,8 +31,8 @@ describe('turn.ts', () => {
         'Hi',
       ],
     });
-    expect(turn.matches('Hi')).to.be.true;
-    expect(turn.matches('Hello')).to.be.true;
+    expect(turn.matches(createTextMessage('Hi'))).to.be.true;
+    expect(turn.matches(createTextMessage('Hello'))).to.be.true;
   });
 
   it('should not match when all of multiple is incorrect', () => {
@@ -41,7 +42,7 @@ describe('turn.ts', () => {
         'Hi',
       ],
     });
-    expect(turn.matches('Bye')).to.be.false;
+    expect(turn.matches(createTextMessage('Bye'))).to.be.false;
   });
 
   it('should refuse to construct bad branches', () => {
@@ -69,7 +70,7 @@ describe('turn.ts', () => {
     expect(new Turn({
       1: branch1,
       2: branch2,
-    }).matches('Hello world')).to.deep.equal([new Turn(branch1[0])]);
+    }).matches(createTextMessage('Hello world'))).to.deep.equal([new Turn(branch1[0])]);
   });
 
   it('should fail to match branches correctly', () => {
@@ -82,7 +83,7 @@ describe('turn.ts', () => {
     expect(new Turn({
       1: branch1,
       2: branch2,
-    }).matches('Bye world')).to.be.false;
+    }).matches(createTextMessage('Bye world'))).to.be.false;
   });
 
   it('should unbox human lists as branches', () => {
@@ -113,15 +114,27 @@ describe('turn.ts', () => {
 
   it('should create the right number of branches for complex cases', () => {
     const turns = Turn.createTurns([
-      { Human: 'Hi' },
-      { 1: [
-          { Bot: 'Hey' },
-          { 1: [
-              { Human: 'How are you?' },
-              { Bot: 'I am good' },
+      {
+        Human: 'Hi',
+      },
+      {
+        1: [
+          {
+            Bot: 'Hey',
+          },
+          {
+            1: [
+              {
+                Human: 'How are you?',
+              },
+              {
+                Bot: 'I am good',
+              },
             ],
             2: [
-              { Bot: 'Is your day well?' },
+              {
+                Bot: 'Is your day well?',
+              },
             ],
           },
         ],
@@ -129,8 +142,11 @@ describe('turn.ts', () => {
           { Human: 'Hello' },
         ],
       },
-      { Bot: 'Do you need assistance?' },
-      { 1: {
+      {
+        Bot: 'Do you need assistance?',
+      },
+      {
+        1: {
           Human: 'Yes',
         },
         2: {
@@ -172,8 +188,8 @@ describe('turn.ts', () => {
         { Bot: 'Hello' },
       ],
     });
-    expect(turn.matches('Hello')).to.have.length(1);
+    expect(turn.matches(createTextMessage('Hello'))).to.have.length(1);
     turn.botBranches[0][0].numRunnersEntered += 1;
-    expect(turn.matches('Hello')).to.eql([]);
+    expect(turn.matches(createTextMessage('Hello'))).to.eql([]);
   });
 });

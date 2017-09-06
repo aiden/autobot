@@ -63,7 +63,24 @@ export class BotFrameworkClient extends Client {
             text: dlMessage.text,
           };
           callback(message);
+        } else if (dlMessage.attachments) {
+          if (dlMessage.attachments.contentType.indexOf('image') !== -1) {
+            const message: Message = {
+              user,
+              messageType: MessageType.Image,
+              text: null,
+            };
+            callback(message);
+          } else if (dlMessage.attachments.contentType.indexOf('hero') !== -1) {
+            const message: Message = {
+              user,
+              messageType: MessageType.Card,
+              text: null,
+            };
+            callback(message);
+          }
         }
+        // Other messages will be ignored
       }
     });
   }

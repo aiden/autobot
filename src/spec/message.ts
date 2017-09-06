@@ -1,6 +1,7 @@
 export enum MessageType {
   Text,
   Image,
+  Card,
 }
 
 export interface Message {

@@ -15,7 +15,8 @@ concise, simple test files with strong flexibility and extensibility.
   - Implement a new connector with only two methods: `send` and `onReceive`.
 - Parallel execution of tests
 - Test against multiple acceptable answers
-- Wildcard matching (`<NUMBER>`, `<WORD>`, ``<\*>``)
+- Wildcard matching (`<NUMBER>`, `<WORD>`, `<*>`)
+- Support for testing rich attachments (`<IMAGE>`, `<CARDS>`)
 - Support for regular expressions (`<(st|nt|nd)>`)
 - Show diffs on error
 - Conversation branches
@@ -139,6 +140,18 @@ preamble:
   - Bot: <*>
   - Human: Hi
 ```
+
+## Special Tags
+
+You can use the following tags in your test dialogue files:
+
+Tag | Meaning
+`<*>` | Matches anything, including whitespaces
+`<WORD>` | A single word without whitespaces
+`<IMAGE>` | An image attachment
+`<CARDS>` | A card attachment
+`<(REGEX)>` | Any regex expression, i.e. `<([0-9]{2})>`
+`<$VARNAME>` | An expression from the locale/translation file
 
 ## Extending to a new platforms
 

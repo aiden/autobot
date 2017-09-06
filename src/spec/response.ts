@@ -1,4 +1,4 @@
-import { MessageType  } from './message';
+import { Message, MessageType  } from './message';
 import { Translator } from '../translator';
 import * as program from 'commander';
 
@@ -13,16 +13,28 @@ export class Response {
   original: string;
 
   constructor(responseData: string) {
-    const trimmedData = responseData.trim();
-    this.original = trimmedData;
-    this.responseType = (trimmedData === '<IMAGE>') ? MessageType.Image : MessageType.Text;
-    if (this.responseType === MessageType.Text) {
-      this.textMatchChecker = new RegExp(Response.transformTags(trimmedData));
+    this.original = responseData.trim();
+    switch (this.original) {
+      case '<IMAGE>':
+        this.responseType = MessageType.Image;
+        break;
+      case '<CARDS>':
+        this.responseType = MessageType.Card;
+        break;
+      default:
+        this.responseType = MessageType.Text;
+        this.textMatchChecker = new RegExp(Response.transformTags(this.original));
     }
   }
 
-  matches(text: string): boolean {
-    return text.trim().match(this.textMatchChecker) !== null;
+  matches(message: Message): boolean {
+    if (message.messageType !== this.responseType) {
+      return false;
+    } else if (this.responseType === MessageType.Text) {
+      return message.text.trim().match(this.textMatchChecker) !== null;
+    } else {
+      return true;
+    }
   }
 
   static transformTags(text: string): string {

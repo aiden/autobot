@@ -141,7 +141,7 @@ export class Runner {
           return;
         }
         nextBot.numRunnersEntered += 1;
-        const match = nextBot.matches(response.text);
+        const match = nextBot.matches(response);
         if (!match) {
           let expected;
           const matchArray = nextBot.toMatchArray();

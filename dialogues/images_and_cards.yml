@@ -1,0 +1,6 @@
+Title: "Images and Cards"
+Dialogue:
+  - Human: Show me some cats
+  - Bot: <IMAGE>
+  - Human: What can you do?
+  - Bot: <CARDS>

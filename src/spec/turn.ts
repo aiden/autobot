@@ -1,6 +1,7 @@
 import { DialogueInvalidError } from './dialogue_invalid_error';
 import { Response } from './response';
 import { Translator } from '../translator';
+import { Message  } from './message';
 
 export enum TurnType {
   Human,
@@ -117,15 +118,15 @@ export class Turn {
    *      (if numRunners has not been exceeded)
    *    - [] when it matches a branch but there is no capacity
    *    - false if there is no match **/
-  matches(text: string): Turn[] | boolean {
+  matches(message: Message): Turn[] | boolean {
     if (this.turnType === TurnType.Bot) {
       return this.responses.some((response) => {
-        return response.matches(text);
+        return response.matches(message);
       });
     } else if (this.turnType === TurnType.Branch) {
       const matchingBranches = this.botBranches
         .filter((branch) => {
-          const match = branch[0].matches(text);
+          const match = branch[0].matches(message);
           return (match === true || (match instanceof Array && match.length > 0));
         });
 

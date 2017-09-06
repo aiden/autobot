@@ -296,4 +296,43 @@ describe('runner.ts', () => {
       expect(testResult.passed).to.be.true;
     });
   });
+  it('should match images and cards correctly', () => {
+    const client = new MockClient();
+    const runner = new Runner(
+      client,
+      getDialoguePath('images_and_cards.yml'),
+      Object.assign(
+        {},
+        defaultConfig),
+    );
+
+    setTimeout(
+      () => {
+        const username = Runner.getUsername({
+          branchNumber: 0,
+          dialogue: new Dialogue(getDialoguePath('images_and_cards.yml')),
+          lastMessage: 0,
+        });
+
+        expect(client.read(username)).to.equal('Show me some cats');
+        client.reply({
+          messageType: MessageType.Image,
+          text: null,
+          user: username,
+        });
+
+        expect(client.read(username)).to.equal('What can you do?');
+        client.reply({
+          messageType: MessageType.Card,
+          text: null,
+          user: username,
+        });
+      },
+      0);
+
+    return runner.start().then((results) => {
+      const testResult = results[0];
+      expect(testResult.passed).to.be.true;
+    });
+  });
 });
