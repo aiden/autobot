@@ -12,7 +12,7 @@ concise, simple test files with strong flexibility and extensibility.
 - Human readable/writable YAML dialogue files
 - Supports any bot platform.
   - Comes with connectors for botframework
-  - Implement a new connector with only two methods: `send` and `onReceive`.
+  - Implement a new connector with only two methods: `send` and `onReply`.
 - Parallel execution of tests
 - Test against multiple acceptable answers
 - Wildcard matching (`<NUMBER>`, `<WORD>`, `<*>`)
