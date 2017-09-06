@@ -146,6 +146,7 @@ preamble:
 You can use the following tags in your test dialogue files:
 
 Tag | Meaning
+--- | ---
 `<*>` | Matches anything, including whitespaces
 `<WORD>` | A single word without whitespaces
 `<IMAGE>` | An image attachment
