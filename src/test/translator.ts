@@ -68,4 +68,9 @@ describe('translator.ts', () => {
     Translator.loadTranslation([getLocalePath('locale1.json')], true);
     expect(Translator.translate('<$luisVar>')).to.eql(['hi <*>']);
   });
+
+  it('should translate plural luis variables correctly', () => {
+    Translator.loadTranslation([getLocalePath('locale1.json')], true);
+    expect(Translator.translate('<$luisVarPlural>')).to.eql(['hi <*>']);
+  });
 });

@@ -6,7 +6,7 @@ export enum ClientType {
 export interface Config {
   client: ClientType;
   directLineSecret: string;
-  localeFiles: string;
+  localeFiles: string[];
   luisLocale: boolean;
   timeout: number;
   preamble: any;

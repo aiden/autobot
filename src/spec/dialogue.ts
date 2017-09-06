@@ -8,7 +8,7 @@ export class Dialogue {
   title: string;
   turns: Turn[];
 
-  constructor(filePath: string) {
+  constructor(filePath: string, preamble?: any[]) {
     let dialogueDoc;
     try {
       dialogueDoc = jsYaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
@@ -29,9 +29,11 @@ export class Dialogue {
       throw new DialogueInvalidError('No dialogue found');
     }
     if (!(dialogueDoc.Dialogue instanceof Array)) {
-      throw new DialogueInvalidError('Dialogue lines must start with dashes');
+      throw new DialogueInvalidError(
+        'Dialogue lines must start with dashes: ${dialogueDoc.Dialogue}');
     }
 
-    this.turns = Turn.createTurns(dialogueDoc.Dialogue);
+    const turnData = preamble ? preamble : [];
+    this.turns = Turn.createTurns(turnData.concat(dialogueDoc.Dialogue));
   }
 }

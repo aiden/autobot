@@ -1,9 +1,7 @@
 {
   "name": "autobot",
   "version": "0.0.1",
-  "description": "Aiden bot end-to-end tests",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "description": "Multi-platform bit testing framework",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -17,7 +15,7 @@
     "type": "git",
     "url": "git://git@github.com/aiden/e2e-tests.git"
   },
-  "author": "Dashbot Ltd",
+  "author": "aiden.ai",
   "license": "UNLICENSED",
   "dependencies": {
     "botframework-directlinejs": "^0.9.11",

@@ -9,6 +9,8 @@ import { DialogueInvalidError } from './spec/dialogue_invalid_error';
 import * as fs from 'fs';
 import * as glob from 'glob';
 import * as path from 'path';
+import * as program from 'commander';
+import * as chalk from 'chalk';
 
 export interface TestResult {
   dialogue: Dialogue;
@@ -33,15 +35,10 @@ export class Runner {
   private onReject: (e: Error) => void;
   private done = false;
   private config: Config;
-  private preamble: Turn[];
 
   constructor(client: Client, dialoguePath: string, config: Config) {
     this.client = client;
     this.config = config;
-
-    if (this.config.preamble) {
-      this.preamble = Turn.createTurns(this.config.preamble).slice();
-    }
 
     const dialogueFileInfo = fs.lstatSync(dialoguePath);
     if (dialogueFileInfo.isDirectory()) {
@@ -50,9 +47,9 @@ export class Runner {
         matchBase: true,
       }).map(filepath => path.join(dialoguePath, filepath))
         .filter(filepath => path.basename(filepath) !== 'autobot.yml')
-        .map(filepath => new Dialogue(filepath));
+        .map(filepath => new Dialogue(filepath, this.config.preamble));
     } else if (dialogueFileInfo.isFile()) {
-      this.dialogues = [new Dialogue(dialoguePath)];
+      this.dialogues = [new Dialogue(dialoguePath, this.config.preamble)];
     } else {
       throw new DialogueInvalidError(`${dialoguePath} does not exist`);
     }
@@ -121,6 +118,10 @@ export class Runner {
       // It is only null on the first execution
       const stack = this.stacks.get(test);
       if (response !== null) {
+        if (program.verbose) {
+          console.log(chalk.blue('\tBOT:', JSON.stringify(response)));
+        }
+        // console.log('GOT RESPONSE: ', response);
         const nextBot = stack.pop();
         if (nextBot.numRunnersEntered === nextBot.numRunnersRequired) {
           // Kill this instance if exhausted
@@ -182,6 +183,9 @@ export class Runner {
           nextBranch.slice(1).reverse().forEach(turn => stack.push(turn));
         }
 
+        if (program.verbose) {
+          console.log(chalk.yellow('\tHUMAN:', next.query));
+        }
         this.client.send({
           messageType: MessageType.Text,
           user: Runner.getUsername(test),

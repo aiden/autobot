@@ -55,12 +55,15 @@ export class BotFrameworkClient extends Client {
           console.log('Unrecognized conversation on directline', dlMessage);
           return;
         }
-        const message: Message = {
-          user,
-          messageType: MessageType.Text,
-          text: dlMessage.text,
-        };
-        callback(message);
+        // TODO: Handle cards and images
+        if (dlMessage.text) {
+          const message: Message = {
+            user,
+            messageType: MessageType.Text,
+            text: dlMessage.text,
+          };
+          callback(message);
+        }
       }
     });
   }

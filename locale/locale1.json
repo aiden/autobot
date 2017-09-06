@@ -2,6 +2,7 @@
   "hey": "hello",
   "yo": "what's up?",
   "luisVar": "hi %(var)",
+  "luisVarPlural": "hi %(var)s",
   "friend": [
     "mate",
     "amigo"

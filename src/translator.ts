@@ -4,9 +4,10 @@ import * as fs from 'fs';
 
 const translateRegex = /<\$(.+?)>/;
 const translateLuis = /%\(.+?\)/g;
+const translateLuisPlural = /%\(.+?\)s/g;
 
 export class Translator {
-  private static translations: Map<string, string[]>;
+  private static translations = new Map<string, string[]>();
 
   static loadTranslation(translationFiles: string[], isLuisLocale?: boolean) {
     Translator.translations = translationFiles
@@ -24,7 +25,7 @@ export class Translator {
 
             if (isLuisLocale) {
               val = val.map((localeLine) => {
-                return localeLine.replace(translateLuis, '<*>');
+                return localeLine.replace(translateLuisPlural, '<*>').replace(translateLuis, '<*>');
               });
             }
 

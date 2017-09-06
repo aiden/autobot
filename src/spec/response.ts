@@ -1,5 +1,6 @@
 import { MessageType  } from './message';
 import { Translator } from '../translator';
+import * as program from 'commander';
 
 const wildcardRegex: RegExp = /<\*>/g;
 const wordRegex: RegExp = /<WORD>/g;
