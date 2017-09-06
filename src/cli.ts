@@ -19,6 +19,8 @@ let chatPath: string = null;
 
 program
   .version('0.1.0')
+  .description('autobot is an multi-platform bot testing framework. ' +
+    'It requires an autobot.yml config file to be in the working directory or a parent.')
   .option('-v', '--verbose', 'Enable full logging including bot queries and responses')
   .option('-c', '--config', 'e2e-test.yml config file to use')
   .arguments('<chatPath>')
@@ -26,22 +28,24 @@ program
     chatPath = chatPathVal;
   })
   .parse(process.argv);
-console.log('');
 
 
 let configPath;
 if (program.config) {
   configPath = program.config;
 } else {
-  configPath = findParentDir.sync(process.cwd(), 'bot-e2e.yml');
+  configPath = findParentDir.sync(process.cwd(), 'autobot.yml');
 }
 
 if (!fs.existsSync(configPath)) {
   if (configPath) {
     console.log(chalk.red(`Cannot find file ${configPath}`));
   } else {
+    program.outputHelp();
     console.log(
-      chalk.red(`Unable to discover bot-e2e.yml config file in this or parent directories`));
+      chalk.red('\nYou must have an autobot.yml config file ' +
+        'in this directory or in a parent directory\n'));
+    process.exit(1);
   }
 }
 
@@ -63,6 +67,7 @@ let success;
 
 let finalResults: TestResult[];
 let start;
+console.log('');
 runner.start(() => {
   start = new Date().getTime();
   console.log(chalk.green(`\n\tDiscovered ${runner.dialogues.length} tests `) +

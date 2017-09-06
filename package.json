@@ -1,5 +1,5 @@
 {
-  "name": "e2e-tests",
+  "name": "autobot",
   "version": "0.0.1",
   "description": "Aiden bot end-to-end tests",
   "main": "dist/index.js",
@@ -9,6 +9,9 @@
     "watch": "tsc -w",
     "clean": "rm -rf dist",
     "test": "mocha --harmony --require source-map-support/register dist/test --recursive"
+  },
+  "bin": {
+    "autobot": "dist/cli.js"
   },
   "repository": {
     "type": "git",
@@ -34,9 +37,7 @@
     "@types/node": "^8.0.26",
     "chai": "^4.1.1",
     "eslint": "^3.19.0",
-    "eslint-config-airbnb": "^14.1.0",
     "mocha": "^3.5.0",
-    "npm-run-all": "^3.1.2",
     "source-map-loader": "^0.1.5",
     "source-map-support": "^0.4.17",
     "ts-loader": "^1.3.3",

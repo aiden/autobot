@@ -252,7 +252,7 @@ describe('runner.ts', () => {
       Object.assign(
         {},
         defaultConfig,
-        jsYaml.safeLoad(fs.readFileSync(getDialoguePath('bot-e2e.yml'), 'utf8'))),
+        jsYaml.safeLoad(fs.readFileSync(getDialoguePath('autobot.yml'), 'utf8'))),
       );
 
     setTimeout(

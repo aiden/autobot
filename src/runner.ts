@@ -49,7 +49,7 @@ export class Runner {
         cwd: dialoguePath,
         matchBase: true,
       }).map(filepath => path.join(dialoguePath, filepath))
-        .filter(filepath => path.basename(filepath) !== 'bot-e2e.yml')
+        .filter(filepath => path.basename(filepath) !== 'autobot.yml')
         .map(filepath => new Dialogue(filepath));
     } else if (dialogueFileInfo.isFile()) {
       this.dialogues = [new Dialogue(dialoguePath)];
