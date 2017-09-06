@@ -1,6 +1,6 @@
 # Autobot: Bot Testing for Humans
 
-[![CircleCI](https://circleci.com/gh/aiden/bot-e2e.svg?style=svg&circle-token=b945b5b109d685a84d3b1d7794c8fd0b2a4f2e0a)](https://circleci.com/gh/aiden/bot-e2e)
+[![CircleCI](https://circleci.com/gh/aiden/autobot.svg?style=svg&circle-token=b945b5b109d685a84d3b1d7794c8fd0b2a4f2e0a)](https://circleci.com/gh/aiden/autobot)
 
 ![autobot terminal image](http://i.imgur.com/3pbAl39.png)
 
