@@ -42,12 +42,25 @@ export class Runner {
 
     const dialogueFileInfo = fs.lstatSync(dialoguePath);
     if (dialogueFileInfo.isDirectory()) {
-      this.dialogues = glob.sync('*.yml', {
+      this.dialogues = glob.sync('**/*.yml', {
         cwd: dialoguePath,
-        matchBase: true,
-      }).map(filepath => path.join(dialoguePath, filepath))
-        .filter(filepath => path.basename(filepath) !== 'autobot.yml')
-        .map(filepath => new Dialogue(filepath, this.config.preamble));
+      }).map((filepath) =>  {
+          try {
+            return new Dialogue(filepath, this.config.preamble);
+          } catch (e) {
+            if (e instanceof DialogueInvalidError) {
+              return null;
+            } else {
+              throw e;
+            }
+          }
+        })
+        .filter(x => x);
+
+      if (this.dialogues.length === 0) {
+        console.log(chalk.red('No test files found on path'));
+        process.exit(1);
+      }
     } else if (dialogueFileInfo.isFile()) {
       this.dialogues = [new Dialogue(dialoguePath, this.config.preamble)];
     } else {
@@ -119,7 +132,11 @@ export class Runner {
       const stack = this.stacks.get(test);
       if (response !== null) {
         if (program.verbose) {
-          console.log(chalk.blue('\tBOT:', JSON.stringify(response)));
+          if (response.messageType === MessageType.Text) {
+            console.log(chalk.blue('\tBOT', response.user, ':', response.text));
+          } else {
+            console.log(chalk.blue('\tBOT:', response.user, ':', JSON.stringify(response)));
+          }
         }
         // console.log('GOT RESPONSE: ', response);
         const nextBot = stack.pop();
@@ -183,12 +200,13 @@ export class Runner {
           nextBranch.slice(1).reverse().forEach(turn => stack.push(turn));
         }
 
+        const user = Runner.getUsername(test);
         if (program.verbose) {
-          console.log(chalk.yellow('\tHUMAN:', next.query));
+          console.log(chalk.yellow('\tHUMAN', user, ':', next.query));
         }
         this.client.send({
+          user,
           messageType: MessageType.Text,
-          user: Runner.getUsername(test),
           text: next.query,
         });
       }

@@ -14,54 +14,117 @@ The core features of this framework are:
 - Bot platform agnostic. Existing connector with Bot Framework, and tiny interface to add new ones (only `send(message)` and `onReceive`)
 - Human readable/writable YAML dialogue files
 - Parallel execution of tests
+- Test against multiple acceptable answers
 - Wildcard matching (<NUMBER>, <WORD>, <\*>)
 - Support for regular expressions (<(st|nt|nd)>)
-- Test on set of acceptable responses
 - Show diffs on error
 - Conversation branches
 - Full unicode support
+- Support for preambles, loading variables from locale/translation files
+
+## Usage
+
+### Dialogue file format
+
+Simple Chat file
+
+```
+Title: "Simple Greetings"
+Dialogue:
+  - Human: Hello
+  - Bot:
+    - Hi
+    - Hello
+  - Bot: How are you?
+  - Human: I'm good
+  - Human: Yourself?
+  - Bot: I'm good too!
+```
+
+Complex chat file with variables, branching, and wildcards
+
+```
+Title: "branching"
+Dialogue:
+  - Human: Hello
+  - Bot: Hi <WORD> // Wildcard match
+  - Human: How are you?
+  - Bot: I am <$emotion> // variable loaded from external file
+  - Human: Show me a picture of a cat
+  - 1:
+      - Bot: Sure
+      - Bot: <IMAGE>
+      - Human: Do you like cats?
+      - 1:
+          - Bot: No
+          - Human: Really?
+        2:
+          - Bot: Yes
+          - Human: Me too!
+    2:
+      - Bot: Sorry, no cats here
+  - Human: Can you assist me?
+  - 1:
+      Bot: Ok
+    2:
+      Bot: No
+```
+
 
 ## Install
 
+To install from npm
 ```
-$ npm install --save
+$ sudo npm install -g autobot
 ```
 
-## Build
-
+To install from source
 ```
 $ npm run build
+$ npm install -g ./
 ```
 
 ## Usage
 
-### Chat file format
-
+You must have a config file `autobot.yml` in the current directory or a parent directory.
 
 ```
-Title: Greetings
-Dialogue:
-  - Human: Hey bot, how are you?
-  - Bot:
-    - Hi <*>, I'm great thanks
-    - Feeling odd, might be some bugs
-  - Human: What's the date today?
-  - Bot: The date today is the <NUMBER><(st|nd|th)> <WORD> <NUMBER>
-  - Human: Can you show me a picture of a cat?
-  - Branch:
-    1:
-      - Bot: There are no pictures sorry
-    2:
-      - Bot: Here you go
-      - Bot: <IMAGE>
-      - Bot:
-        - Would you like to see more?
-        - Want another one?
-      - Branch:
-          1:
-            - Human: Yes please
-          2:
-            - Human: No thanks
+$ autobot
+
+  Usage: autobot [options] <chatPath>
+
+  autobot is an multi-platform bot testing framework. It requires an autobot.yml config file to be in the working directory or a parent.
+
+
+  Options:
+
+    -V, --version               output the version number
+    -v --verbose                Enable full logging including bot queries and responses
+    -c, --config <autobot.yml>  autobot.yml config file to use (default current directory and parents)
+    -h, --help                  output usage information
+```
+
+To run a specific test:
+
+```
+$ autobot ./path/to/test.yml
+```
+
+To run all tests recursively in a directory:
+
+```
+$ autobot ./path/to/directory
+```
+
+To see the dialogue in the console, add the `-v` flag
+
+```
+$ autobot -v ./path/to/test.yml
+
+	Discovered 1 tests (1 branches)
+
+  HUMAN testuser-simple-0: Hello
+  BOT testuser-simple-0: Hi!
 ```
 
 ### Specifying a chat file or directory

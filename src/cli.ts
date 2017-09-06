@@ -24,28 +24,35 @@ program
   .description('autobot is an multi-platform bot testing framework. ' +
     'It requires an autobot.yml config file to be in the working directory or a parent.')
   .option('-v --verbose', 'Enable full logging including bot queries and responses')
-  .option('-c, --config <autobot.yml>', 'e2e-test.yml config file to use')
+  .option('-c, --config <autobot.yml>', 'autobot.yml config file to use ' + 
+    '(default current directory and parents)')
   .arguments('<chatPath>')
   .action((chatPathVal) => {
     chatPath = chatPathVal;
   })
   .parse(process.argv);
 
+if (chatPath === null) {
+  chatPath = './';
+}
 
 let configPath;
 if (program.config) {
   configPath = program.config;
 } else {
-  configPath = path.join(findParentDir.sync(process.cwd(), 'autobot.yml'), 'autobot.yml');
+  configPath = path.join(
+    process.cwd(),
+    'autobot.yml');
 }
 
 if (!fs.existsSync(configPath)) {
-  if (configPath) {
+  if (program.configPath) {
     console.log(chalk.red(`Cannot find file ${configPath}`));
   } else {
     program.outputHelp();
     console.log(
-      chalk.red('\nYou must have an autobot.yml config file ' +
+      chalk.red(
+        '\nYou must have an autobot.yml config file ' +
         'in this directory or in a parent directory\n'));
     process.exit(1);
   }
