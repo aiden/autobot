@@ -38,6 +38,9 @@ export class Turn {
 
     // Force data into array for Human and Bot
     if (this.turnType === TurnType.Human || this.turnType === TurnType.Bot) {
+      if (typeof data === 'number') {
+        data = data.toString();
+      }
       if (typeof data === 'string') {
         data = [data];
       }

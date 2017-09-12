@@ -23,6 +23,11 @@ describe('turn.ts', () => {
       Bot: 'Hello',
     }).matches(createTextMessage('bye '))).to.be.false;
   });
+
+  it('should handle numbers correctly', () => {
+    expect(new Turn({ Bot: 1 })).to.eql(new Turn({ Bot: '1' }));
+    expect(new Turn({ Human: 1 })).to.eql(new Turn({ Human: '1' }));
+  });
   
   it('should match when one of multiple is correct', () => {
     const turn = new Turn({
