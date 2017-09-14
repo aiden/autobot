@@ -43,7 +43,7 @@ export class Response {
     const taggedText = text
       .replace(wildcardRegex, '<((.|[$R$N])*?)>')
       .replace(wordRegex, '<([^ ]+?)>')
-      .replace(numberRegex, '<([0-9\.]+)>');
+      .replace(numberRegex, '<([0-9\.,]+)>');
 
     const regexes: string[] = [];
     let match;
