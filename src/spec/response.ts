@@ -62,7 +62,7 @@ export class Response {
       outText = outText.replace(escapedVersion, regexString);
     });
 
-    outText = outText.replace('$R$N', '\r\n');
+    outText = outText.replace(/\$R\$N/g, '\r\n');
     return outText;
   }
   static escapeRegex(text: string): string {
