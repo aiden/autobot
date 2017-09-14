@@ -82,6 +82,9 @@ Tag | Meaning
 `<(REGEX)>` | Any regex expression, i.e. `<([0-9]{2})>`
 `<$VARNAME>` | An expression from the locale/translation file
 
+Note that if you want your REGEX to contain `\r\n` characters you need to replace
+them with the special `$R$N` sequence.
+
 ## Install
 
 To install from npm
