@@ -17,6 +17,11 @@ import * as findParentDir from 'find-parent-dir';
 import * as semver from 'semver';
 import 'source-map-support/register';
 
+process.on('unhandledRejection', (error) => {
+  // Will print "unhandledRejection err is not defined"
+  console.log('unhandledRejection', error.message);
+});
+
 let chatPath: string = null;
 
 program
@@ -24,6 +29,7 @@ program
   .description('autobot is an multi-platform bot testing framework. ' +
     'It requires an autobot.yml config file to be in the working directory or a parent.')
   .option('-v --verbose', 'Enable full logging including bot queries and responses')
+  .option('-j --json', 'Enable seeing the direct JSON responses from the client')
   .option('-c, --config <autobot.yml>', 'autobot.yml config file to use ' + 
     '(default current directory and parents)')
   .arguments('<chatPath>')

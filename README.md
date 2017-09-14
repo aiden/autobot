@@ -111,6 +111,7 @@ $ autobot
 
     -V, --version               output the version number
     -v --verbose                Enable full logging including bot queries and responses
+    -j --json                   Enable seeing the direct JSON responses from the client
     -c, --config <autobot.yml>  autobot.yml config file to use (default current directory and parents)
     -h, --help                  output usage information
 ```

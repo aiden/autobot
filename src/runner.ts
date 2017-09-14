@@ -256,7 +256,7 @@ export class Runner {
         this.results.set(test.dialogue, {
           dialogue: test.dialogue,
           passed: false,
-          errorMessage: `timeout waiting on ${stack[stack.length - 1].toString()}`,
+          errorMessage: `timeout waiting on ${JSON.stringify(stack[stack.length - 1])}`,
         });
       }
     });

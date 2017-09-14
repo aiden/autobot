@@ -7,6 +7,8 @@ import {
   Message as BotMessage } from 'botframework-directlinejs';
 import { Client } from './client_interface';
 import { Message, MessageType } from '../spec/message';
+import * as program from 'commander';
+import * as chalk from 'chalk';
 
 // // HAX: This is necessary for Node.js
 // // https://github.com/Microsoft/BotFramework-DirectLineJS/issues/20
@@ -40,47 +42,57 @@ export class BotFrameworkClient extends Client {
     );
   }
 
+  //TODO: Check accepting input
   public onReply(callback: (message: Message) => void) {
     this.directLine.activity$
-    .filter(activity => activity.type === 'message')
+      .filter((activity) => {
+        return activity.type === 'message';
+      })
     .subscribe((dlMessage: any) => {
-      // console.log(`RECEIVED: ${JSON.stringify(dlMessage)}`);
-      if (dlMessage.from.id.indexOf('testuser') !== -1) {
-        // Outbound message
-        this.messageIdToUser.set(dlMessage.id, dlMessage.from.name);
-      } else {
-        // inbound message
-        const user = this.messageIdToUser.get(dlMessage.replyToId);
-        if (user === undefined) {
-          console.log('Unrecognized conversation on directline', dlMessage);
-          return;
+      try {
+        if (program.json) {
+          console.log(`RECEIVED: ${JSON.stringify(dlMessage)}`);
         }
-        // TODO: Handle cards and images
-        if (dlMessage.text) {
-          const message: Message = {
-            user,
-            messageType: MessageType.Text,
-            text: dlMessage.text,
-          };
-          callback(message);
-        } else if (dlMessage.attachments) {
-          if (dlMessage.attachments.contentType.indexOf('image') !== -1) {
-            const message: Message = {
-              user,
-              messageType: MessageType.Image,
-              text: null,
-            };
-            callback(message);
-          } else if (dlMessage.attachments.contentType.indexOf('hero') !== -1) {
-            const message: Message = {
-              user,
-              messageType: MessageType.Card,
-              text: null,
-            };
-            callback(message);
+        if (dlMessage.from.id.indexOf('testuser') !== -1) {
+          // Outbound message
+          this.messageIdToUser.set(dlMessage.id, dlMessage.from.name);
+        } else {
+          // inbound message
+          const user = this.messageIdToUser.get(dlMessage.replyToId);
+          if (user === undefined) {
+            console.error('Unrecognized conversation on directline', dlMessage);
+            return;
           }
+          // TODO: Handle cards and images
+          if (dlMessage.text) {
+            const message: Message = {
+              user,
+              messageType: MessageType.Text,
+              text: dlMessage.text,
+            };
+            callback(message);
+          } else if (dlMessage.attachments) {
+            if (dlMessage.attachments[0].contentType.indexOf('image') !== -1) {
+              const message: Message = {
+                user,
+                messageType: MessageType.Image,
+                text: null,
+              };
+              callback(message);
+            } else if (dlMessage.attachments[0].contentType.indexOf('hero') !== -1) {
+              const message: Message = {
+                user,
+                messageType: MessageType.Card,
+                text: null,
+              };
+              callback(message);
+            }
+          }
+          // Other messages will be ignored
         }
-        // Other messages will be ignored
+
+      } catch (error) {
+        console.error(chalk.red('DIRECTLINE ERROR'), error);
       }
     });
   }
