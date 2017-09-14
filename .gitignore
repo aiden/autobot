@@ -5,3 +5,6 @@ built
 /e2e.js.map
 
 npm-debug.log
+*.iml
+dist/
+.idea/
