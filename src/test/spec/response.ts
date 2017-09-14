@@ -16,7 +16,7 @@ describe('response.ts', () => {
     expect(Response.escapeRegex('<(.*)>')).to.equal('<\\(\\.\\*\\)>');
   });
   it('should transform tags', () => {
-    expect(Response.transformTags('Hey <*>')).to.equal('Hey (.*?)');
+    expect(Response.transformTags('Hey <*>')).to.equal('Hey ((.|[\r\n])*?)');
     expect(Response.transformTags('Hey <WORD> there')).to.equal('Hey ([^ ]+?) there');
   });
   it('should instantiate <CARDS> correctly', () => {
@@ -65,5 +65,8 @@ describe('response.ts', () => {
   });
   it('should support unicode matches', () => {
     expect(new Response('✓').matches(createTextMessage('✓'))).to.be.true;
+  });
+  it('should match across newlines', () => {
+    expect(new Response('Hey<*>World').matches(createTextMessage('Hey\nWorld'))).to.be.true;
   });
 });
