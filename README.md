@@ -27,7 +27,7 @@ concise, simple test files with strong flexibility and extensibility.
 
 Simple Chat file
 
-```
+```YAML
 Title: "Simple Greetings"
 Dialogue:
   - Human: Hello
@@ -42,31 +42,32 @@ Dialogue:
 
 Complex chat file with variables, branching, and wildcards
 
-```
-Title: "branching"
+```YAML
+Title: "Branching conversation"
 Dialogue:
   - Human: Hello
   - Bot: Hi <WORD> // Wildcard match
   - Human: How are you?
   - Bot: I am <$emotion> // variable loaded from external file
-  - Human: Show me a picture of a cat
+  - Human: How's my campaign doing?
+  - Bot: Your impressions are up 20% since last week! Would you like to see more?
   - 1:
-      - Bot: Sure
+      - Human: Sure
+      - Bot: Here's a graph of your impressions in the last month.
       - Bot: <IMAGE>
-      - Human: Do you like cats?
+    2:
+      - Human: No
+      - Bot: Anything else I can help with?
+      - Human: What countries is this campaign live in?
       - 1:
-          - Bot: No
-          - Human: Really?
+          - Bot: Your campaign is live in <NUMBER> countries right now
+          - Human: Show me ad spend by country
+          - Bot: Here you go
+          - Bot: <IMAGE>
         2:
-          - Bot: Yes
-          - Human: Me too!
-    2:
-      - Bot: Sorry, no cats here
-  - Human: Can you assist me?
-  - 1:
-      Bot: Ok
-    2:
-      Bot: No
+          - Bot: Your campaign is only live in 1 country right now
+          - Human: Which one?
+          - Bot: <WORD>
 ```
 
 ## Special Tags
