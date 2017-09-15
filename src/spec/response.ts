@@ -63,7 +63,7 @@ export class Response {
     });
 
     outText = outText.replace(/\$R\$N/g, '\r\n');
-    return outText;
+    return `^${outText}$`;
   }
   static escapeRegex(text: string): string {
     return text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');

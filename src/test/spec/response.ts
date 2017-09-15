@@ -16,8 +16,8 @@ describe('response.ts', () => {
     expect(Response.escapeRegex('<(.*)>')).to.equal('<\\(\\.\\*\\)>');
   });
   it('should transform tags', () => {
-    expect(Response.transformTags('Hey <*>')).to.equal('Hey ((.|[\r\n])*?)');
-    expect(Response.transformTags('Hey <WORD> there')).to.equal('Hey ([^ ]+?) there');
+    expect(Response.transformTags('Hey <*>')).to.equal('^Hey ((.|[\r\n])*?)$');
+    expect(Response.transformTags('Hey <WORD> there')).to.equal('^Hey ([^ ]+?) there$');
   });
   it('should instantiate <CARDS> correctly', () => {
     expect(new Response(' <CARDS> ').responseType).to.equal(MessageType.Card);
@@ -60,8 +60,8 @@ describe('response.ts', () => {
       .matches(createTextMessage('Hi , your profits are up 14.5% this week. Have a good day!')))
       .to.be.false;
   });
-  it('should be a contains match', () => {
-    expect(new Response('up').matches(createTextMessage('whatsup'))).to.be.true;
+  it('should not be a contains match', () => {
+    expect(new Response('up').matches(createTextMessage('whatsup'))).to.be.false;
   });
   it('should support unicode matches', () => {
     expect(new Response('✓').matches(createTextMessage('✓'))).to.be.true;
