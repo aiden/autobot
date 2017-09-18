@@ -169,7 +169,7 @@ export class Turn {
         return this.responses.map(response => response.original);
       case TurnType.Branch:
         return this.botBranches
-          .map(branch => branch[0].toString());
+          .map(branch => branch[0].toMatchArray()[0]);
       default:
         throw new Error('cannot have match array for Human');
     }
