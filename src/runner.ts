@@ -22,6 +22,7 @@ export interface TestMeta {
   branchNumber: number;
   dialogue: Dialogue;
   lastMessage: number;
+  terminated: boolean;
 };
 
 export class Runner {
@@ -75,6 +76,7 @@ export class Runner {
           dialogue,
           branchNumber: i,
           lastMessage: new Date().getTime(),
+          terminated: false,
         };
         this.userMetadata.set(Runner.getUsername(testMeta), testMeta);
       });
@@ -123,6 +125,9 @@ export class Runner {
 
   private executeTurn(test: TestMeta, response: Message) {
     try {
+      if (test.terminated) {
+        return;
+      }
       // It is only null on the first execution
       const stack = this.stacks.get(test);
       if (response !== null) {
@@ -216,6 +221,7 @@ export class Runner {
   }
 
   private terminateInstance(test: TestMeta) {
+    test.terminated = true;
     this.numAlive.set(test.dialogue, this.numAlive.get(test.dialogue) - 1);
     this.checkIfComplete(test);
   }

@@ -23,6 +23,7 @@ describe('runner.ts', () => {
           branchNumber: 0,
           dialogue: new Dialogue(getDialoguePath('examples/simple.yml')),
           lastMessage: 0,
+          terminated: false,
         });
         expect(client.read(username)).to.equal('Hello');
         client.reply({
@@ -87,6 +88,7 @@ describe('runner.ts', () => {
           branchNumber: 0,
           dialogue: new Dialogue(getDialoguePath('examples/simple.yml')),
           lastMessage: 0,
+          terminated: false,
         });
         client.reply({
           messageType: MessageType.Text,
@@ -118,6 +120,7 @@ describe('runner.ts', () => {
             branchNumber: i,
             dialogue: new Dialogue(getDialoguePath('examples/branching.yml')),
             lastMessage: 0,
+            terminated: false,
           });
         });
 
@@ -194,6 +197,7 @@ describe('runner.ts', () => {
             branchNumber: i,
             dialogue: new Dialogue(getDialoguePath('examples/branching.yml')),
             lastMessage: 0,
+            terminated: false,
           });
         });
 
@@ -261,6 +265,7 @@ describe('runner.ts', () => {
           branchNumber: 0,
           dialogue: new Dialogue(getDialoguePath('examples/simple.yml')),
           lastMessage: 0,
+          terminated: false,
         });
 
         expect(client.read(username)).to.equal('Hi there');
@@ -312,6 +317,7 @@ describe('runner.ts', () => {
           branchNumber: 0,
           dialogue: new Dialogue(getDialoguePath('images_and_cards.yml')),
           lastMessage: 0,
+          terminated: false,
         });
 
         expect(client.read(username)).to.equal('Show me some cats');
