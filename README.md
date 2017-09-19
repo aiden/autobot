@@ -49,7 +49,7 @@ Dialogue:
   - Bot: Hi <WORD> // Wildcard match
   - Human: How are you?
   - Bot: I am <$emotion> // variable loaded from external file
-  - Wait: 5
+  - Wait: 5000
   - Human: How's my campaign doing?
   - Bot: Your impressions are up 20% since last week! Would you like to see more?
   - 1:
