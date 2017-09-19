@@ -341,4 +341,53 @@ describe('runner.ts', () => {
       expect(testResult.passed).to.be.true;
     });
   });
+
+  it('should wait for Wait lines', () => {
+    const client = new MockClient();
+    const runner = new Runner(
+      client,
+      getDialoguePath('wait_greeting.yml'),
+      Object.assign(
+        {},
+        defaultConfig),
+    );
+    setTimeout(
+      () => {
+        const username = Runner.getUsername({
+          branchNumber: 0,
+          dialogue: new Dialogue(getDialoguePath('wait_greeting.yml')),
+          lastMessage: 0,
+          terminated: false,
+        });
+
+        expect(client.read(username)).to.equal('Hey there');
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'How are you?',
+          user: username,
+        });
+        expect(client.read(username)).to.be.undefined;
+        setTimeout(() => {
+          expect(client.read(username)).to.undefined;
+        }, 25);
+        setTimeout(() => {
+          expect(client.read(username)).to.equal('Hola');
+          client.reply({
+            messageType: MessageType.Text,
+            text: 'Como estas?',
+            user: username,
+          });
+        }, 35);
+      },
+      0);
+    let startTime: number;
+    return runner.start(() => {
+      startTime = new Date().getTime();
+    }).then((results) => {
+      const testResult = results[0];
+      expect(testResult.passed).to.be.true;
+      const duration = (new Date().getTime()) - startTime;
+      expect(duration).to.be.greaterThan(30).and.lessThan(40);
+    });
+  });
 });

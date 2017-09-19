@@ -1,0 +1,7 @@
+Title: "Wait Greetings"
+Dialogue:
+  - Human: Hey there
+  - Bot: How are you?
+  - Wait: 30
+  - Human: Hola
+  - Bot: Como estas?

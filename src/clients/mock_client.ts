@@ -18,10 +18,11 @@ export class MockClient extends Client {
     this.cb = callback;
   }
 
+  // Returns undefined if there are no messages currently
   read(user: string): string {
     const messageQueue = this.received.get(user);
     if (messageQueue === undefined) {
-      return null;
+      return undefined;
     } else {
       return messageQueue.shift();
     }

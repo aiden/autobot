@@ -41,7 +41,7 @@ export class Response {
     regexRegex.lastIndex = 0;
 
     const taggedText = text
-      .replace(wildcardRegex, '<((.|[$R$N])*?)>')
+      .replace(wildcardRegex, '<([\\s\\S]*?)>')
       .replace(wordRegex, '<([^ ]+?)>')
       .replace(numberRegex, '<([0-9\.,]+)>');
 
@@ -62,7 +62,6 @@ export class Response {
       outText = outText.replace(escapedVersion, regexString);
     });
 
-    outText = outText.replace(/\$R\$N/g, '\r\n');
     return `^${outText}$`;
   }
   static escapeRegex(text: string): string {

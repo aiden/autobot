@@ -7,6 +7,7 @@ export enum TurnType {
   Human,
   Bot,
   Branch,
+  Wait,
 }
 
 export class Turn {
@@ -17,6 +18,7 @@ export class Turn {
   botBranches: Turn[][] = [];
   numRunnersRequired: number;
   numRunnersEntered = 0;
+  waitTime: number;
 
   constructor(turnData: any, next?: Turn) {
     let data;
@@ -31,6 +33,12 @@ export class Turn {
     } else if (turnData['1']) {
       this.turnType = TurnType.Branch;
       data = turnData;
+    } else if (turnData.Wait) {
+      this.turnType = TurnType.Wait;
+      if (typeof turnData.Wait !== 'number') {
+        throw new DialogueInvalidError(`Expected number for Wait value, got ${turnData.Wait}`);
+      }
+      data = turnData.Wait;
     } else {
       throw new DialogueInvalidError(
         `No Human, Bot, or Branching keys on ${JSON.stringify(turnData)}`);
@@ -85,6 +93,9 @@ export class Turn {
         }
         this.humanBranches = branches.filter(branch => branch[0].turnType === TurnType.Human);
         this.botBranches = branches.filter(branch => branch[0].turnType === TurnType.Bot);
+        break;
+      case TurnType.Wait:
+        this.waitTime = turnData.Wait;
         break;
     }
 

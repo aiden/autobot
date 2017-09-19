@@ -49,6 +49,7 @@ Dialogue:
   - Bot: Hi <WORD> // Wildcard match
   - Human: How are you?
   - Bot: I am <$emotion> // variable loaded from external file
+  - Wait: 5
   - Human: How's my campaign doing?
   - Bot: Your impressions are up 20% since last week! Would you like to see more?
   - 1:
@@ -82,9 +83,6 @@ Tag | Meaning
 `<CARDS>` | A card attachment
 `<(REGEX)>` | Any regex expression, i.e. `<([0-9]{2})>`
 `<$VARNAME>` | An expression from the locale/translation file
-
-Note that if you want your REGEX to contain `\r\n` characters you need to replace
-them with the special `$R$N` sequence.
 
 ## Install
 

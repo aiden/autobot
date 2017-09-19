@@ -32,6 +32,7 @@ program
   .option('-j --json', 'Enable seeing the direct JSON responses from the client')
   .option('-c, --config <autobot.yml>', 'autobot.yml config file to use ' + 
     '(default current directory and parents)')
+  .option('-np, --no-parallel', 'Disables parallelism')
   .arguments('<chatPath>')
   .action((chatPathVal) => {
     chatPath = chatPathVal;

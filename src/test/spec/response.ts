@@ -16,7 +16,7 @@ describe('response.ts', () => {
     expect(Response.escapeRegex('<(.*)>')).to.equal('<\\(\\.\\*\\)>');
   });
   it('should transform tags', () => {
-    expect(Response.transformTags('Hey <*>')).to.equal('^Hey ((.|[\r\n])*?)$');
+    expect(Response.transformTags('Hey <*>')).to.equal('^Hey ([\\s\\S]*?)$');
     expect(Response.transformTags('Hey <WORD> there')).to.equal('^Hey ([^ ]+?) there$');
   });
   it('should instantiate <CARDS> correctly', () => {

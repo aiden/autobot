@@ -16,14 +16,14 @@ export interface TestResult {
   dialogue: Dialogue;
   passed: boolean;
   errorMessage: string;
-};
+}
 
 export interface TestMeta {
   branchNumber: number;
   dialogue: Dialogue;
   lastMessage: number;
   terminated: boolean;
-};
+}
 
 export class Runner {
   private client: Client;
@@ -159,7 +159,8 @@ export class Runner {
           this.results.set(test.dialogue, {
             dialogue: test.dialogue,
             passed: false,
-            errorMessage: `\tExpected:\n${expected}` +
+            errorMessage: chalk.red(`\t${Runner.getUsername(test)}\n`) +
+                          `\tExpected:\n${expected}` +
                           `\n\tGot:\n\t\t${response.text}`,
           });
           this.terminateInstance(test);
@@ -185,7 +186,8 @@ export class Runner {
       while (stack.length > 0 &&
           ((next = stack[stack.length - 1]).turnType === TurnType.Human ||
           (next.turnType === TurnType.Branch &&
-            (nextBranch = next.nextHuman()) !== undefined))) {
+            (nextBranch = next.nextHuman()) !== undefined) ||
+          (next.turnType === TurnType.Wait))) {
 
         stack.pop();
         // Kill if this turn is exhausted
@@ -193,12 +195,24 @@ export class Runner {
           this.terminateInstance(test);
           return;
         }
+
         next.numRunnersEntered += 1;
+
+        if (next.turnType === TurnType.Wait) {
+          setTimeout(
+            () => {
+              this.executeTurn(test, null);
+            },
+            next.waitTime);
+          return;
+        }
+
         if (next.turnType === TurnType.Branch) {
           next = nextBranch[0];
           next.numRunnersEntered += 1;
           nextBranch.slice(1).reverse().forEach(turn => stack.push(turn));
         }
+
 
         const user = Runner.getUsername(test);
         if (program.verbose) {
@@ -262,7 +276,16 @@ export class Runner {
         this.results.set(test.dialogue, {
           dialogue: test.dialogue,
           passed: false,
-          errorMessage: `timeout waiting on ${JSON.stringify(stack[stack.length - 1])}`,
+          errorMessage: 'timeout waiting on:\n' +
+              chalk.red(`\t${Runner.getUsername(test)}\n`) +
+              (stack[stack.length - 1].turnType === TurnType.Human ?
+              (
+                `Sending: ${stack[stack.length - 1].query}`
+              ) : (
+                stack[stack.length - 1]
+                .toMatchArray()
+                .map(str => `\t-${str}\n`)
+              )),
         });
       }
     });
