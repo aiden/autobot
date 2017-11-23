@@ -20,6 +20,7 @@ export class BotFrameworkClient extends Client {
   private directLine: DirectLine;
   private messageIdToUser = new Map<string, string>();
   private onReadyCb: () => void;
+  private historyIds: string[] = [];
 
   constructor(directLineSecret: string) {
     super();
@@ -42,11 +43,13 @@ export class BotFrameworkClient extends Client {
     );
   }
 
-  //TODO: Check accepting input
+  // TODO: Check accepting input
   public onReply(callback: (message: Message) => void) {
     this.directLine.activity$
       .filter((activity) => {
-        return activity.type === 'message';
+        const exists = this.historyIds.includes(activity.id);
+        if (!exists) this.historyIds.push(activity.id);
+        return activity.type === 'message' && !exists;
       })
     .subscribe((dlMessage: any) => {
       try {

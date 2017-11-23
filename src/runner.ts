@@ -36,6 +36,7 @@ export class Runner {
   private onReject: (e: Error) => void;
   private done = false;
   private config: Config;
+  private timing: number;
 
   constructor(client: Client, dialoguePath: string, config: Config) {
     this.client = client;
@@ -132,10 +133,13 @@ export class Runner {
       const stack = this.stacks.get(test);
       if (response !== null) {
         if (program.verbose) {
+          const timing = (new Date().getTime() - this.timing) || 0;
           if (response.messageType === MessageType.Text) {
-            console.log(chalk.blue('\tBOT', response.user, ':', response.text));
+            console.log(chalk.blue('\tBOT', response.user, ':', response.text),
+              chalk.magenta(` (${timing}ms)`));
           } else {
-            console.log(chalk.blue('\tBOT:', response.user, ':', JSON.stringify(response)));
+            console.log(chalk.blue('\tBOT:', response.user, ':', JSON.stringify(response)),
+              chalk.magenta(` (${timing}ms)`));
           }
         }
         // console.log('GOT RESPONSE: ', response);
@@ -217,6 +221,7 @@ export class Runner {
         const user = Runner.getUsername(test);
         if (program.verbose) {
           console.log(chalk.yellow('\tHUMAN', user, ':', next.query));
+          this.timing = new Date().getTime();
         }
         this.client.send({
           user,
