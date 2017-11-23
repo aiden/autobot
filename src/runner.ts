@@ -151,7 +151,7 @@ export class Runner {
           let expected;
           const matchArray = nextBot.toMatchArray();
           if (matchArray.length > 1) {
-            expected = matchArray.map(str => `\t\t- ${str}`).join();
+            expected = matchArray.map(str => `\t\t- ${str}`).join('\n');
           } else {
             expected = `\t\t${matchArray[0]}`;
           }
