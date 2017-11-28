@@ -1,6 +1,6 @@
 {
   "name": "autobot",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Multi-platform bit testing framework",
   "scripts": {
     "build": "tsc",

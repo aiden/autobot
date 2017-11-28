@@ -88,7 +88,7 @@ Tag | Meaning
 
 To install from npm
 ```
-$ npm install -g autobot
+$ npm install -g auto-bot
 ```
 
 To install from source
