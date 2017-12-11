@@ -34,11 +34,15 @@ export class BotFrameworkClient extends Client {
       type: 'message',
       text: message.text,
     };
-    // console.log(`POSTING: ${activity.text}`);
+    console.log(`POSTING: ${activity.from.name}`);
     this.directLine
     .postActivity(activity)
     .subscribe(
-      id => null,
+      (id) => {
+        if (id === 'retry') {
+          this.send(message);
+        }
+      },
       error => console.log('DirectLine error, can\'t send: ', error),
     );
   }
