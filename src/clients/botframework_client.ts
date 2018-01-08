@@ -15,6 +15,8 @@ import * as chalk from 'chalk';
 const globalAny:any = global;
 globalAny.XMLHttpRequest = require('xhr2');
 
+const retried = new Set<string>();
+
 export class BotFrameworkClient extends Client {
   private conectionStatus: ConnectionStatus;
   private directLine: DirectLine;
@@ -34,12 +36,16 @@ export class BotFrameworkClient extends Client {
       type: 'message',
       text: message.text,
     };
-    console.log(`POSTING: ${activity.from.name}`);
     this.directLine
     .postActivity(activity)
     .subscribe(
       (id) => {
         if (id === 'retry') {
+          const messageKey = JSON.stringify(message);
+          if (retried.has(messageKey)) {
+            console.log('DirectLine error, can\'t send: ');
+          }
+          retried.add(messageKey);
           this.send(message);
         }
       },
