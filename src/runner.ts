@@ -6,6 +6,7 @@ import { Response } from './spec/Response';
 import { Turn, TurnType } from './spec/turn';
 import { Config } from './config';
 import { DialogueInvalidError } from './spec/dialogue_invalid_error';
+import { Translator } from './translator';
 
 import * as fs from 'fs';
 import * as glob from 'glob';
@@ -43,7 +44,7 @@ export class Runner {
   constructor(client: Client, dialoguePath: string, config: Config) {
     this.client = client;
     this.config = config;
-    this.ignore = config.ignore.map(i => new Response(i));
+    this.ignore = config.ignore.map(i => new Response(Translator.translate(i)[0]));
 
     const dialogueFileInfo = fs.lstatSync(dialoguePath);
     if (dialogueFileInfo.isDirectory()) {
