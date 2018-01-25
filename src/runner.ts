@@ -2,7 +2,7 @@
 import { Client } from './clients/client_interface';
 import { Dialogue } from './spec/dialogue';
 import { Message, MessageType } from './spec/message';
-import { Response } from './spec/Response';
+import { Response } from './spec/response';
 import { Turn, TurnType } from './spec/turn';
 import { Config } from './config';
 import { DialogueInvalidError } from './spec/dialogue_invalid_error';
