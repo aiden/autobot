@@ -9,6 +9,7 @@ export interface Config {
   localeFiles: string[];
   timeout: number;
   preamble: any;
+  ignore: string[];
 }
 
 export const defaultConfig: Config = {
@@ -17,4 +18,5 @@ export const defaultConfig: Config = {
   localeFiles: null,
   timeout: 10000,
   preamble: null,
+  ignore: [],
 };

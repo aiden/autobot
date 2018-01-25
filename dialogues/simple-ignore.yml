@@ -1,0 +1,10 @@
+Title: "Simple Ignore"
+Dialogue:
+  - Human: Hello
+  - Bot:
+    - Hi
+    - Hello
+  - Human: I'm good
+  - Human: Yourself?
+  - Bot: I'm good too
+

@@ -2,6 +2,7 @@
 import { Client } from './clients/client_interface';
 import { Dialogue } from './spec/dialogue';
 import { Message, MessageType } from './spec/message';
+import { Response } from './spec/Response';
 import { Turn, TurnType } from './spec/turn';
 import { Config } from './config';
 import { DialogueInvalidError } from './spec/dialogue_invalid_error';
@@ -37,10 +38,12 @@ export class Runner {
   private done = false;
   private config: Config;
   private timing: number;
+  private ignore: Response[];
 
   constructor(client: Client, dialoguePath: string, config: Config) {
     this.client = client;
     this.config = config;
+    this.ignore = config.ignore.map(i => new Response(i));
 
     const dialogueFileInfo = fs.lstatSync(dialoguePath);
     if (dialogueFileInfo.isDirectory()) {
@@ -141,6 +144,9 @@ export class Runner {
             console.log(chalk.blue('\tBOT:', response.user, ':', JSON.stringify(response)),
               chalk.magenta(` (${timing}ms)`));
           }
+        }
+        if (this.ignore.find(i => i.matches(response))) {
+          return;
         }
         // console.log('GOT RESPONSE: ', response);
         const nextBot = stack.pop();

@@ -52,6 +52,45 @@ describe('runner.ts', () => {
     });
   });
 
+  it('should ignore things in the ignore', () => {
+    const client = new MockClient();
+    const runner = new Runner(client, getDialoguePath('simple-ignore.yml'),
+      { ...defaultConfig, ignore: ['123'] });
+    setTimeout(
+      () => {
+        const username = Runner.getUsername({
+          branchNumber: 0,
+          dialogue: new Dialogue(getDialoguePath('simple-ignore.yml')),
+          lastMessage: 0,
+          terminated: false,
+        });
+        expect(client.read(username)).to.equal('Hello');
+        client.reply({
+          messageType: MessageType.Text,
+          text: '123',
+          user: username,
+        });
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'Hi',
+          user: username,
+        });
+        expect(client.read(username)).to.equal('I\'m good');
+        expect(client.read(username)).to.equal('Yourself?');
+        client.reply({
+          messageType: MessageType.Text,
+          text: 'I\'m good too',
+          user: username,
+        });
+      },
+      0);
+
+    return runner.start().then((results) => {
+      const testResult = results[0];
+      expect(testResult.passed).to.be.true;
+    });
+  });
+
   it('should load multiple conversations from a directory', () => {
     const client = new MockClient();
     const runner = new Runner(
