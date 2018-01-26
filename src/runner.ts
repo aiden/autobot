@@ -44,7 +44,12 @@ export class Runner {
   constructor(client: Client, dialoguePath: string, config: Config) {
     this.client = client;
     this.config = config;
-    this.ignore = config.ignore.map(i => new Response(Translator.translate(i)[0]));
+    this.ignore = config.ignore.reduce((allIgnored, ignoreLine) => {
+      Translator.translate(ignoreLine).forEach((responseData) => {
+        allIgnored.push(new Response(responseData));
+      });
+      return allIgnored;
+    }, []);
 
     const dialogueFileInfo = fs.lstatSync(dialoguePath);
     if (dialogueFileInfo.isDirectory()) {
