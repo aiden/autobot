@@ -130,6 +130,9 @@ export class Runner {
         };
         setTimeout(intervalCheckIfDone, this.config.timeout / 2);
       });
+    }).then((v) => {
+      this.client.close();
+      return <TestResult[]>v;
     });
   }
 

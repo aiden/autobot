@@ -70,14 +70,6 @@ const config: Config = Object.assign(
   {},
   defaultConfig,
   jsYaml.safeLoad(fs.readFileSync(configPath, 'utf8')));
-let client: Client;
-
-if (config.client === ClientType.BotFramework) {
-  client = new BotFrameworkClient(config.directLineSecret);
-} else {
-  console.log('ERROR: unsupported client', config.client);
-  process.exit(1);
-}
 
 if (config.localeFiles) {
   if (typeof config.localeFiles === 'string') {
@@ -91,7 +83,7 @@ if (config.localeFiles) {
 
 console.log('');
 async function run() {
-  const runners = getRunners(client, chatPath, config);
+  const runners = getRunners(chatPath, config);
   let success;
 
   let finalResults: TestResult[];
@@ -114,7 +106,6 @@ async function run() {
     console.log(chalk.red(err));
   }
 
-  client.close();
   console.log('');
 
   finalResults.filter(result => !result.passed).forEach((failedResult) => {

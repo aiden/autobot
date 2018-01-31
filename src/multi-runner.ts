@@ -1,6 +1,7 @@
 import { Runner, TestMeta } from './runner';
 import { Client } from './clients/client_interface';
-import { Config } from './config';
+import { Config, ClientType } from './config';
+import { BotFrameworkClient } from './clients/botframework_client';
 
 import { Dialogue } from './spec/dialogue';
 import { Message } from './spec/message';
@@ -16,16 +17,32 @@ import * as path from 'path';
 // import * as chalk from 'chalk';
 
 export function getRunners(
-  client: Client,
   dialoguePath: string,
   config: Config,
 ): Runner[] {
   const dialogueFileInfo = fs.lstatSync(dialoguePath);
   let dialogues;
   if (dialogueFileInfo.isDirectory()) {
+    const titles = {};
     dialogues = glob.sync('**/*.yml', {
       cwd: dialoguePath,
     }).map(x => path.join(dialoguePath, x))
+      .map((filepath) =>  {
+        try {
+          const dialogue = new Dialogue(filepath, config.preamble);
+          if (titles[dialogue.title]) {
+            return null;
+          }
+          titles[dialogue.title] = true;
+          return filepath;
+        } catch (e) {
+          if (e instanceof DialogueInvalidError) {
+            return null;
+          } else {
+            throw e;
+          }
+        }
+      })
       .filter(x => x);
 
     if (dialogues.length === 0) {
@@ -37,7 +54,15 @@ export function getRunners(
     throw new DialogueInvalidError(`${dialoguePath} does not exist`);
   }
   const runners = dialogues.map((dpath) => {
-    return new Runner(client, dpath, config);
+    return new Runner(createClient(config), dpath, config);
   });
   return runners;
+}
+function createClient(config: Config): Client {
+  if (config.client === ClientType.BotFramework) {
+    return new BotFrameworkClient(config.directLineSecret);
+  } else {
+    console.log('ERROR: unsupported client', config.client);
+    process.exit(1);
+  }
 }
