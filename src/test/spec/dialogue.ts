@@ -13,7 +13,7 @@ describe('dialogue.ts', () => {
   it('should fail to open non-compliant YML', () => {
     expect(() => {
       new Dialogue(path.join(__dirname, '..', '..', '..', 'dialogues', 'bad_greeting.yml'));
-    }).to.throw(/not valid YAML/);;
+    }).to.throw(/not valid YAML/);
   });
   it('should parse valid YAML', () => {
     const dialogue = new Dialogue(

@@ -4,6 +4,7 @@
   "description": "Multi-platform bit testing framework",
   "scripts": {
     "build": "tsc",
+    "lint": "tslint -p tsconfig.json",
     "watch": "tsc -w",
     "clean": "rm -rf dist",
     "test": "mocha --harmony --require source-map-support/register dist/test --recursive",

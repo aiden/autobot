@@ -36,7 +36,7 @@ describe('translator.ts', () => {
   it('should merge multiple translation files', () => {
     Translator.loadTranslation(
       [getLocalePath('locale1.json'),
-        getLocalePath('locale2.json')]);
+       getLocalePath('locale2.json')]);
     expect(Translator.translate('hi <$friend>'))
       .to.have.members([
         'hi buddy',

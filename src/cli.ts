@@ -3,6 +3,7 @@
 
 import { Message } from './spec/message';
 import { Runner, TestResult } from './runner';
+import { getRunners } from './multi-runner';
 import { BotFrameworkClient } from './clients/botframework_client';
 import { Client } from './clients/client_interface';
 import { Config, defaultConfig, ClientType } from './config';
@@ -89,27 +90,30 @@ if (config.localeFiles) {
 }
 
 console.log('');
-const runner = new Runner(client, chatPath, config);
-let success;
+async function run() {
+  const runners = getRunners(client, chatPath, config);
+  let success;
 
-let finalResults: TestResult[];
-let start;
-runner.start(() => {
-  start = new Date().getTime();
-  console.log(chalk.green(`\n\tDiscovered ${runner.dialogues.length} tests `) +
-              `(${runner.userMetadata.size} branches)\n`);
-}).then((results) => {
-  finalResults = results;
-  results.forEach((result) => {
-    const chalkFn = result.passed ? chalk.green : chalk.red;
-    console.log(
-      chalkFn(`\t${result.passed ? '✓' : '✗'} ${result.dialogue.title}` +
-        `: ${result.passed ? 'Passed' : 'Failed'}`));
-  });
-  success = !results.some(result => !result.passed);
-}).catch((err) => {
-  console.log(chalk.red(err));
-}).then(() => {
+  let finalResults: TestResult[];
+  let start;
+  try {
+    const results = await Promise.all(runners.map(runner => runner.start(() => {
+      start = new Date().getTime();
+      console.log(chalk.green(`\n\tDiscovered ${runner.dialogues.length} tests `) +
+                  `(${runner.userMetadata.size} branches)\n`);
+    })));
+    finalResults = results.map(r => r[0]);
+    finalResults.forEach((result) => {
+      const chalkFn = result.passed ? chalk.green : chalk.red;
+      console.log(
+        chalkFn(`\t${result.passed ? '✓' : '✗'} ${result.dialogue.title}` +
+          `: ${result.passed ? 'Passed' : 'Failed'}`));
+    });
+    success = !finalResults.some(result => !result.passed);
+  } catch (err) {
+    console.log(chalk.red(err));
+  }
+
   client.close();
   console.log('');
 
@@ -132,4 +136,7 @@ runner.start(() => {
   } else {
     process.exit(1);
   }
+}
+run().catch((err) => {
+  console.error(err);
 });
