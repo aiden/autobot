@@ -89,10 +89,10 @@ async function run() {
   let finalResults: TestResult[];
   let start;
   try {
+    start = new Date().getTime();
+    console.log(chalk.green(`\n\tDiscovered ${runners.length} tests `));
+                // `(${runner.userMetadata.size} branches)\n`);
     const results = await Promise.all(runners.map(runner => runner.start(() => {
-      start = new Date().getTime();
-      console.log(chalk.green(`\n\tDiscovered ${runner.dialogues.length} tests `) +
-                  `(${runner.userMetadata.size} branches)\n`);
     })));
     finalResults = results.map(r => r[0]);
     finalResults.forEach((result) => {
