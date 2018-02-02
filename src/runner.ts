@@ -147,7 +147,11 @@ export class Runner {
         if (program.verbose) {
           const timing = (new Date().getTime() - this.timing) || 0;
           if (response.messageType === MessageType.Text) {
-            console.log(chalk.blue('\tBOT', response.user, ':', response.text),
+            const texts = response.text.split('\n');
+            const truncatedText = texts.length > 5
+              ? texts.slice(0, 5).join('\n') + '...' : response.text;
+            console.log(chalk.blue('\tBOT', response.user, ':',
+              truncatedText),
               chalk.magenta(` (${timing}ms)`));
           } else {
             console.log(chalk.blue('\tBOT:', response.user, ':', JSON.stringify(response)),
