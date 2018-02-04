@@ -3,7 +3,7 @@
 
 import { Message } from './spec/message';
 import { Runner, TestResult } from './runner';
-import { getRunners } from './multi-runner';
+import { getRunners } from './multi_runner';
 import { BotFrameworkClient } from './clients/botframework_client';
 import { Client } from './clients/client_interface';
 import { Config, defaultConfig, ClientType } from './config';

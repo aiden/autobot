@@ -7,12 +7,14 @@ import { Turn, TurnType } from './spec/turn';
 import { Config } from './config';
 import { DialogueInvalidError } from './spec/dialogue_invalid_error';
 import { Translator } from './translator';
+import { createBar, tickProgress } from './pretty_printer';
 
 import * as fs from 'fs';
 import * as glob from 'glob';
 import * as path from 'path';
 import * as program from 'commander';
 import * as chalk from 'chalk';
+import * as ProgressBar from 'ascii-progress';
 
 export interface TestResult {
   dialogue: Dialogue;
@@ -31,6 +33,8 @@ export class Runner {
   private client: Client;
   dialogues: Dialogue[];
   userMetadata = new Map<string, TestMeta>();
+  progressBar: ProgressBar;
+  minWidth: number = 0; // for the progress bar
   private numAlive = new Map<Dialogue, number>();
   private results = new Map<Dialogue, TestResult>();
   private stacks = new Map<TestMeta, Turn[]>();
@@ -105,9 +109,18 @@ export class Runner {
   static getUsername(test: TestMeta): string {
     return `testuser-${test.dialogue.title}-${test.branchNumber}`;
   }
+  
+  public createProgressBar() {
+    if (!program.verbose) {
+      this.progressBar = createBar(this.dialogues[0], this.minWidth);
+    }
+  }
 
   public start(onStart?: () => void): Promise<TestResult[]> {
     return new Promise((resolve, reject) => {
+      if (this.progressBar) {
+        tickProgress(this.progressBar, this.dialogues[0], this.minWidth);
+      }
       this.onComplete = resolve;
       this.onReject = reject;
       this.client.onReady().then(() => {
@@ -188,6 +201,9 @@ export class Runner {
           });
           this.terminateInstance(test);
           return;
+        }
+        if (!program.verbose) {
+          tickProgress(this.progressBar, this.dialogues[0], this.minWidth);
         }
         if (match instanceof Array) {
           // Means it matched an exhausted branch, terminate this runner
