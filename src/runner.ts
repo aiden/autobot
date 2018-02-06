@@ -7,14 +7,14 @@ import { Turn, TurnType } from './spec/turn';
 import { Config } from './config';
 import { DialogueInvalidError } from './spec/dialogue_invalid_error';
 import { Translator } from './translator';
-import { createBar, tickProgress } from './pretty_printer';
+import { createBar, tickProgress, failProgress } from './pretty_printer';
 
 import * as fs from 'fs';
 import * as glob from 'glob';
 import * as path from 'path';
 import * as program from 'commander';
 import * as chalk from 'chalk';
-import * as ProgressBar from 'ascii-progress';
+import * as ProgressBar from 'node-progress-bars';
 
 export interface TestResult {
   dialogue: Dialogue;
@@ -118,9 +118,6 @@ export class Runner {
 
   public start(onStart?: () => void): Promise<TestResult[]> {
     return new Promise((resolve, reject) => {
-      if (this.progressBar) {
-        tickProgress(this.progressBar, this.dialogues[0], this.minWidth);
-      }
       this.onComplete = resolve;
       this.onReject = reject;
       this.client.onReady().then(() => {
@@ -184,6 +181,9 @@ export class Runner {
         nextBot.numRunnersEntered += 1;
         const match = nextBot.matches(response);
         if (!match) {
+          if (this.progressBar) {
+            failProgress(this.progressBar, this.dialogues[0], this.minWidth);
+          }
           let expected;
           const matchArray = nextBot.toMatchArray();
           if (matchArray.length > 1) {
@@ -203,6 +203,7 @@ export class Runner {
           return;
         }
         if (!program.verbose) {
+          // So this will not be accurate if you expect multiple entries back
           tickProgress(this.progressBar, this.dialogues[0], this.minWidth);
         }
         if (match instanceof Array) {

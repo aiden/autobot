@@ -136,11 +136,15 @@ export class BotFrameworkClient extends Client {
             break;
           case ConnectionStatus.Connecting:
             // currently trying to connect to the conversation
-            console.log('Connecting to DirectLine...');
+            if (program.verbose) {
+              console.log('Connecting to DirectLine...');
+            }
             break;
           case ConnectionStatus.Online:
             // successfully connected to the converstaion. Connection is healthy so far as we know.
-            console.log('Connected to DirectLine.');
+            if (program.verbose) {
+              console.log('Connected to DirectLine.');
+            }
             if (this.onReadyCb) {
               this.onReadyCb();
             }

@@ -92,6 +92,7 @@ async function run() {
     start = new Date().getTime();
     console.log(chalk.green(`\n\tDiscovered ${runners.length} tests `));
                 // `(${runner.userMetadata.size} branches)\n`);
+    runners.forEach(r => r.progressBar && r.progressBar.update(0));
     const results = await Promise.all(runners.map(runner => runner.start(() => {
     })));
     finalResults = results.map(r => r[0]);

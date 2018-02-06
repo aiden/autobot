@@ -24,13 +24,13 @@
   "author": "aiden.ai",
   "license": "UNLICENSED",
   "dependencies": {
-    "ascii-progress": "^1.0.5",
     "botframework-directlinejs": "^0.9.11",
     "chalk": "2.1",
     "commander": "^2.11.0",
     "find-parent-dir": "^0.3.0",
     "glob": "^7.1.2",
     "js-yaml": "^3.9.1",
+    "node-progress-bars": "^1.0.8",
     "semver": "^5.4.1",
     "source-map-support": "^0.4.17",
     "xhr2": "^0.1.4"
