@@ -202,7 +202,7 @@ export class Runner {
           this.terminateInstance(test);
           return;
         }
-        if (!program.verbose) {
+        if (!program.verbose && this.progressBar) {
           // So this will not be accurate if you expect multiple entries back
           tickProgress(this.progressBar, this.dialogues[0], this.minWidth);
         }
