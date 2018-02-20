@@ -1,6 +1,6 @@
 {
   "name": "auto-bot",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Multi-platform bit testing framework",
   "scripts": {
     "build": "tsc",
