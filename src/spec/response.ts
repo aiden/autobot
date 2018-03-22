@@ -47,7 +47,7 @@ export class Response {
       .replace(cardsRegex, '')
       .replace(wildcardRegex, '<([\\s\\S]*?)>')
       .replace(wordRegex, '<([^ ]+?)>')
-      .replace(numberRegex, '<([0-9\.,]+)>');
+      .replace(numberRegex, '<([0-9\.,-]+)>');
 
     const regexes: string[] = [];
     let match;

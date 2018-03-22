@@ -80,13 +80,16 @@ export class BotFrameworkClient extends Client {
             user,
             messageTypes: [
               dlMessage.text && MessageType.Text,
-              dlMessage.attachments.some(a => a.contentType.includes('image')) && MessageType.Image,
-              dlMessage.attachments.some(a => a.contentType.includes('hero')) && MessageType.Card,
+              dlMessage.attachments && dlMessage.attachments.some(a =>
+                a.contentType.includes('image')) && MessageType.Image,
+              dlMessage.attachments && dlMessage.attachments.some(a =>
+                a.contentType.includes('hero')) && MessageType.Card,
             ].filter(m => m),
             text: dlMessage.text || null,
           };
           if (message.messageTypes.length) {
             callback(message);
+            return;
           }
         }
 
