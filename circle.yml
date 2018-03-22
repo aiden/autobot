@@ -1,3 +1,8 @@
+dependencies:
+  override:
+    - yarn
 test:
+  override:
+    - yarn test
   pre:
-    - npm run build
+    - yarn build
