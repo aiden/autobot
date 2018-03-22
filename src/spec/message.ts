@@ -5,7 +5,7 @@ export enum MessageType {
 }
 
 export interface Message {
-  messageType: MessageType;
+  messageTypes: MessageType[];
   text: string;
   user: string;
 }

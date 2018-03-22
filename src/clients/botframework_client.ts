@@ -76,32 +76,18 @@ export class BotFrameworkClient extends Client {
             console.error('Unrecognized conversation on directline', dlMessage);
             return;
           }
-          // TODO: Handle cards and images
-          if (dlMessage.text) {
-            const message: Message = {
-              user,
-              messageType: MessageType.Text,
-              text: dlMessage.text,
-            };
+          const message: Message = {
+            user,
+            messageTypes: [
+              dlMessage.text && MessageType.Text,
+              dlMessage.attachments.some(a => a.contentType.includes('image')) && MessageType.Image,
+              dlMessage.attachments.some(a => a.contentType.includes('hero')) && MessageType.Card,
+            ].filter(m => m),
+            text: dlMessage.text || null,
+          };
+          if (message.messageTypes.length) {
             callback(message);
-          } else if (dlMessage.attachments) {
-            if (dlMessage.attachments[0].contentType.indexOf('image') !== -1) {
-              const message: Message = {
-                user,
-                messageType: MessageType.Image,
-                text: null,
-              };
-              callback(message);
-            } else if (dlMessage.attachments[0].contentType.indexOf('hero') !== -1) {
-              const message: Message = {
-                user,
-                messageType: MessageType.Card,
-                text: null,
-              };
-              callback(message);
-            }
           }
-          // Other messages will be ignored
         }
 
       } catch (error) {

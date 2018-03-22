@@ -5,6 +5,8 @@ import * as program from 'commander';
 const wildcardRegex: RegExp = /<\*>/g;
 const wordRegex: RegExp = /<WORD>/g;
 const numberRegex: RegExp = /<NUMBER>/g;
+const imageRegex: RegExp = /<IMAGE>/g;
+const cardsRegex: RegExp = /<CARDS>/g;
 const regexRegex: RegExp = /<\((.+?)\)>/g;
 
 export class Response {
@@ -28,7 +30,7 @@ export class Response {
   }
 
   matches(message: Message): boolean {
-    if (message.messageType !== this.responseType) {
+    if (!message.messageTypes.includes(this.responseType)) {
       return false;
     } else if (this.responseType === MessageType.Text) {
       return message.text.trim().match(this.textMatchChecker) !== null;
@@ -41,6 +43,8 @@ export class Response {
     regexRegex.lastIndex = 0;
 
     const taggedText = text
+      .replace(imageRegex, '')
+      .replace(cardsRegex, '')
       .replace(wildcardRegex, '<([\\s\\S]*?)>')
       .replace(wordRegex, '<([^ ]+?)>')
       .replace(numberRegex, '<([0-9\.,]+)>');
@@ -49,7 +53,7 @@ export class Response {
     let match;
     while ((match = regexRegex.exec(taggedText)) != null) {
       // Take the first group out
-      regexes.push('(' + match[1] + ')');
+      regexes.push(`(${match[1]})`);
     }
 
     const escapedText = Response.escapeRegex(taggedText);

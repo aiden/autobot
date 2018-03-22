@@ -156,7 +156,7 @@ export class Runner {
       if (response !== null) {
         if (program.verbose) {
           const timing = (new Date().getTime() - this.timing) || 0;
-          if (response.messageType === MessageType.Text) {
+          if (response.messageTypes.includes(MessageType.Text)) {
             const texts = response.text.split('\n');
             const truncatedText = texts.length > 5
               ? texts.slice(0, 5).join('\n') + '...' : response.text;
@@ -261,7 +261,7 @@ export class Runner {
         }
         this.client.send({
           user,
-          messageType: MessageType.Text,
+          messageTypes: [MessageType.Text],
           text: next.query,
         });
       }

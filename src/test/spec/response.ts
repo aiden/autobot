@@ -5,7 +5,7 @@ import { Message, MessageType } from '../../spec/message';
 export function createTextMessage(text: string): Message {
   return {
     text,
-    messageType: MessageType.Text,
+    messageTypes: [MessageType.Text],
     user: null,
   };
 }
@@ -32,14 +32,14 @@ describe('response.ts', () => {
     expect(new Response(' <IMAGE> ').matches({
       user: null,
       text: null,
-      messageType: MessageType.Image,
+      messageTypes: [MessageType.Image],
     })).to.be.true;
   });
   it('should match <CARDS> correctly', () => {
     expect(new Response(' <CARDS> ').matches({
       user: null,
       text: null,
-      messageType: MessageType.Card,
+      messageTypes: [MessageType.Card],
     })).to.be.true;
   });
   it('should match simple phrases correctly', () => {
