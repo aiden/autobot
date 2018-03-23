@@ -14,7 +14,7 @@ export interface Config {
 
 export const defaultConfig: Config = {
   client: ClientType.Mock,
-  directLineSecret: null,
+  directLineSecret: process.env.MICROSOFT_DIRECTLINE_SECRET || null,
   localeFiles: null,
   timeout: 10000,
   preamble: null,
