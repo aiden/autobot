@@ -7,7 +7,7 @@ export function createBar(dialogue: Dialogue, minWidth: number): ProgressBar {
   return new ProgressBar({
     schema: `${title}: [:bar] :current/:total :percent :elapseds.yellow`,
     current: 0,
-    total: dialogue.turns.filter(t => t.turnType === TurnType.Human).length,
+    total: dialogue.turns.filter(t => t.turnType === TurnType.Bot).length,
   });
 }
 
