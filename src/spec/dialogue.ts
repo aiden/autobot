@@ -13,7 +13,7 @@ export class Dialogue {
     try {
       dialogueDoc = jsYaml.safeLoad(fs.readFileSync(filePath, 'utf8'));
       if (!dialogueDoc) {
-        throw new DialogueInvalidError('Not a valid yaml: ${filePath}');
+        throw new DialogueInvalidError(`Not a valid yaml: ${filePath}`);
       }
     } catch (e) {
       if (e instanceof jsYaml.YAMLException) {
@@ -30,7 +30,7 @@ export class Dialogue {
     }
     if (!(dialogueDoc.Dialogue instanceof Array)) {
       throw new DialogueInvalidError(
-        'Dialogue lines must start with dashes: ${dialogueDoc.Dialogue}');
+        `Dialogue lines must start with dashes: ${dialogueDoc.Dialogue}`);
     }
 
     const turnData = preamble ? preamble : [];
