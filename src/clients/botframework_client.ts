@@ -78,7 +78,7 @@ export class BotFrameworkClient extends Client {
           }
           const message: Message = {
             user,
-            attachments: dlMessage.map((a) => {
+            attachments: dlMessage.attachments.map((a) => {
               if (a.contentType.includes('image')) return Attachment.Image;
               if (a.contentType.includes('hero')) return Attachment.Cards;
               return Attachment.Other;
