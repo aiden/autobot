@@ -51,6 +51,62 @@ describe('response.ts', () => {
       attachments: [Attachment.Cards],
     })).to.be.true;
   });
+  it('should match correct text with an attachment if text is expected', () => {
+    expect(new Response('Here are your options: <CARDS>').matches({
+      user: null,
+      text: ' Here are your options: ',
+      attachments: [Attachment.Cards],
+    })).to.be.true;
+  });
+  it('should not match incorrect text with an attachment if text is expected', () => {
+    expect(new Response('Here are your options: <CARDS>').matches({
+      user: null,
+      text: 'choose from ',
+      attachments: [Attachment.Cards],
+    })).to.be.false;
+  });
+  it('should not match incorrect type of attachment', () => {
+    expect(new Response('<IMAGE>').matches({
+      user: null,
+      text: null,
+      attachments: [Attachment.Other],
+    })).to.be.false;
+  });
+  it('should not match a missing attachment', () => {
+    expect(new Response('Here you go: <IMAGE> ').matches({
+      user: null,
+      text: 'Here you go:',
+      attachments: [],
+    })).to.be.false;
+  });
+  it('should match multiple attachments', () => {
+    expect(new Response('Here you go:<IMAGE><IMAGE> ').matches({
+      user: null,
+      text: 'Here you go:',
+      attachments: [Attachment.Image, Attachment.Image],
+    })).to.be.true;
+  });
+  it('should not match the wrong number of attachments', () => {
+    expect(new Response('Here you go: <IMAGE> <IMAGE>').matches({
+      user: null,
+      text: 'Here you go:',
+      attachments: [Attachment.Image, Attachment.Image, Attachment.Image],
+    })).to.be.false;
+  });
+  it('should match different types of attachments', () => {
+    expect(new Response(' Here you go:  <IMAGE>  <CARDS> ').matches({
+      user: null,
+      text: 'Here you go:',
+      attachments: [Attachment.Image, Attachment.Cards],
+    })).to.be.true;
+  });
+  it('should not match the wrong order of attachments', () => {
+    expect(new Response(' <IMAGE> <CARDS>').matches({
+      user: null,
+      text: null,
+      attachments: [Attachment.Cards, Attachment.Image],
+    })).to.be.false;
+  });
   it('should match simple phrases correctly', () => {
     expect(new Response('Hello there!').matches(createTextMessage(' Hello there! ')))
       .to.be.true;
