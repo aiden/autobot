@@ -5,7 +5,7 @@ import { Message, Attachment } from '../../spec/message';
 export function createTextMessage(text: string): Message {
   return {
     text,
-    attachments: [Attachment.Text],
+    attachments: [],
     user: null,
   };
 }

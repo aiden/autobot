@@ -1,7 +1,13 @@
+/*
+ * An enumeration of the possible attachment types.
+ *
+ * `Other` is a catch-all for any attachment type that is not (yet) explicitly
+ * supported.
+ */
 export enum Attachment {
-  Text = 'Text',
   Image = 'Image',
-  Card = 'Card',
+  Cards = 'Cards',
+  Other = 'Other',
 }
 
 export interface Message {

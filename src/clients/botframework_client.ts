@@ -78,16 +78,14 @@ export class BotFrameworkClient extends Client {
           }
           const message: Message = {
             user,
-            attachments: [
-              dlMessage.text && Attachment.Text,
-              dlMessage.attachments && dlMessage.attachments.some(a =>
-                a.contentType.includes('image')) && Attachment.Image,
-              dlMessage.attachments && dlMessage.attachments.some(a =>
-                a.contentType.includes('hero')) && Attachment.Card,
-            ].filter(m => m),
+            attachments: dlMessage.map((a) => {
+              if (a.contentType.includes('image')) return Attachment.Image;
+              if (a.contentType.includes('hero')) return Attachment.Cards;
+              return Attachment.Other;
+            }),
             text: dlMessage.text || null,
           };
-          if (message.attachments.length) {
+          if (message.text || message.attachments.length) {
             callback(message);
             return;
           }
