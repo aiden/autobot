@@ -6,7 +6,7 @@ import {
   Activity,
   Message as BotMessage } from 'botframework-directlinejs';
 import { Client } from './client_interface';
-import { Message, MessageType } from '../spec/message';
+import { Message, Attachment } from '../spec/message';
 import * as program from 'commander';
 import * as chalk from 'chalk';
 
@@ -78,16 +78,16 @@ export class BotFrameworkClient extends Client {
           }
           const message: Message = {
             user,
-            messageTypes: [
-              dlMessage.text && MessageType.Text,
+            attachments: [
+              dlMessage.text && Attachment.Text,
               dlMessage.attachments && dlMessage.attachments.some(a =>
-                a.contentType.includes('image')) && MessageType.Image,
+                a.contentType.includes('image')) && Attachment.Image,
               dlMessage.attachments && dlMessage.attachments.some(a =>
-                a.contentType.includes('hero')) && MessageType.Card,
+                a.contentType.includes('hero')) && Attachment.Card,
             ].filter(m => m),
             text: dlMessage.text || null,
           };
-          if (message.messageTypes.length) {
+          if (message.attachments.length) {
             callback(message);
             return;
           }

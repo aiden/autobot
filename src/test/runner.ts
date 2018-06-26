@@ -3,7 +3,7 @@ import { Runner } from '../runner';
 import { MockClient } from '../clients/mock_client';
 import { defaultConfig } from '../config';
 import { Dialogue } from '../spec/dialogue';
-import { MessageType } from '../spec/message';
+import { Attachment } from '../spec/message';
 
 import * as fs from 'fs';
 import * as path from 'path';
@@ -27,19 +27,19 @@ describe('runner.ts', () => {
         });
         expect(client.read(username)).to.equal('Hello');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Hi',
           user: username,
         });
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'How are you?',
           user: username,
         });
         expect(client.read(username)).to.equal('I\'m good');
         expect(client.read(username)).to.equal('Yourself?');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'I\'m good too',
           user: username,
         });
@@ -66,19 +66,19 @@ describe('runner.ts', () => {
         });
         expect(client.read(username)).to.equal('Hello');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: '123',
           user: username,
         });
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Hi',
           user: username,
         });
         expect(client.read(username)).to.equal('I\'m good');
         expect(client.read(username)).to.equal('Yourself?');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'I\'m good too',
           user: username,
         });
@@ -130,7 +130,7 @@ describe('runner.ts', () => {
           terminated: false,
         });
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Bye',
           user: username,
         });
@@ -174,14 +174,14 @@ describe('runner.ts', () => {
 
         expect(client.read(users[0])).to.equal('Can you assist me?');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Ok',
           user: users[0],
         });
         // This ends user0
         
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Howdy',
           user: users[1],
         });
@@ -189,21 +189,21 @@ describe('runner.ts', () => {
         expect(client.read(users[1])).to.equal('Are you a cowboy?');
 
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Yes',
           user: users[1],
         });
         expect(client.read(users[1])).to.equal('Really?');
         expect(client.read(users[1])).to.equal('Can you assist me?');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'No',
           user: users[1],
         });
         // This ends user1
         
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Howdy',
           user: users[2],
         });
@@ -211,7 +211,7 @@ describe('runner.ts', () => {
         expect(client.read(users[2])).to.equal('Are you a cowboy?');
 
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'No',
           user: users[2],
         });
@@ -251,13 +251,13 @@ describe('runner.ts', () => {
 
         expect(client.read(users[0])).to.equal('Can you assist me?');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Random text',
           user: users[0],
         });
         // user0 fails now
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Howdy',
           user: users[1],
         });
@@ -266,7 +266,7 @@ describe('runner.ts', () => {
         // user1 shortcircuits
         
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Howdy',
           user: users[2],
         });
@@ -309,26 +309,26 @@ describe('runner.ts', () => {
 
         expect(client.read(username)).to.equal('Hi there');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Hey',
           user: username,
         });
 
         expect(client.read(username)).to.equal('Hello');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'Hi',
           user: username,
         });
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'How are you?',
           user: username,
         });
         expect(client.read(username)).to.equal('I\'m good');
         expect(client.read(username)).to.equal('Yourself?');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'I\'m good too',
           user: username,
         });
@@ -361,14 +361,14 @@ describe('runner.ts', () => {
 
         expect(client.read(username)).to.equal('Show me some cats');
         client.reply({
-          messageTypes: [MessageType.Image],
+          attachments: [Attachment.Image],
           text: null,
           user: username,
         });
 
         expect(client.read(username)).to.equal('What can you do?');
         client.reply({
-          messageTypes: [MessageType.Card],
+          attachments: [Attachment.Cards],
           text: null,
           user: username,
         });
@@ -401,7 +401,7 @@ describe('runner.ts', () => {
 
         expect(client.read(username)).to.equal('Hey there');
         client.reply({
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: 'How are you?',
           user: username,
         });
@@ -412,7 +412,7 @@ describe('runner.ts', () => {
         setTimeout(() => {
           expect(client.read(username)).to.equal('Hola');
           client.reply({
-            messageTypes: [MessageType.Text],
+            attachments: [Attachment.Text],
             text: 'Como estas?',
             user: username,
           });

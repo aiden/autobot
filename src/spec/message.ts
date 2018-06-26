@@ -1,11 +1,11 @@
-export enum MessageType {
+export enum Attachment {
   Text = 'Text',
   Image = 'Image',
   Card = 'Card',
 }
 
 export interface Message {
-  messageTypes: MessageType[];
+  attachments: Attachment[];
   text: string;
   user: string;
 }

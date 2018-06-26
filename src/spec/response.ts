@@ -1,16 +1,14 @@
-import { Message, MessageType  } from './message';
+import { Message, Attachment  } from './message';
 import { Translator } from '../translator';
 import * as program from 'commander';
 
 const wildcardRegex: RegExp = /<\*>/g;
 const wordRegex: RegExp = /<WORD>/g;
 const numberRegex: RegExp = /<NUMBER>/g;
-const imageRegex: RegExp = /<IMAGE>/g;
-const cardsRegex: RegExp = /<CARDS>/g;
 const regexRegex: RegExp = /<\((.+?)\)>/g;
 
 export class Response {
-  responseType: MessageType;
+  attachments: Attachment[];
   private textMatchChecker: RegExp;
   original: string;
 
@@ -18,21 +16,21 @@ export class Response {
     this.original = responseData.trim();
     switch (this.original) {
       case '<IMAGE>':
-        this.responseType = MessageType.Image;
+        this.responseType = Attachment.Image;
         break;
       case '<CARDS>':
-        this.responseType = MessageType.Card;
+        this.responseType = Attachment.Card;
         break;
       default:
-        this.responseType = MessageType.Text;
+        this.responseType = Attachment.Text;
         this.textMatchChecker = new RegExp(Response.transformTags(this.original));
     }
   }
 
   matches(message: Message): boolean {
-    if (!message.messageTypes.includes(this.responseType)) {
+    if (!message.attachments.includes(this.responseType)) {
       return false;
-    } else if (this.responseType === MessageType.Text) {
+    } else if (this.responseType === Attachment.Text) {
       return message.text.trim().match(this.textMatchChecker) !== null;
     } else {
       return true;
@@ -43,8 +41,6 @@ export class Response {
     regexRegex.lastIndex = 0;
 
     const taggedText = text
-      .replace(imageRegex, '')
-      .replace(cardsRegex, '')
       .replace(wildcardRegex, '<([\\s\\S]*?)>')
       .replace(wordRegex, '<([^ ]+?)>')
       .replace(numberRegex, '<([0-9\.,-]+)>');

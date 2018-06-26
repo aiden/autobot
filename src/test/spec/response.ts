@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import { Response } from '../../spec/response';
-import { Message, MessageType } from '../../spec/message';
+import { Message, Attachment } from '../../spec/message';
 
 export function createTextMessage(text: string): Message {
   return {
     text,
-    messageTypes: [MessageType.Text],
+    attachments: [Attachment.Text],
     user: null,
   };
 }
@@ -20,26 +20,26 @@ describe('response.ts', () => {
     expect(Response.transformTags('Hey <WORD> there')).to.equal('^Hey ([^ ]+?) there$');
   });
   it('should instantiate <CARDS> correctly', () => {
-    expect(new Response(' <CARDS> ').responseType).to.equal(MessageType.Card);
+    expect(new Response(' <CARDS> ').responseType).to.equal(Attachment.Card);
   });
   it('should instantiate <IMAGE> correctly', () => {
-    expect(new Response(' <IMAGE> ').responseType).to.equal(MessageType.Image);
+    expect(new Response(' <IMAGE> ').responseType).to.equal(Attachment.Image);
   });
   it('should match <CARDS> correctly', () => {
-    expect(new Response(' <CARDS> ').responseType).to.equal(MessageType.Card);
+    expect(new Response(' <CARDS> ').responseType).to.equal(Attachment.Card);
   });
   it('should match <IMAGE> correctly', () => {
     expect(new Response(' <IMAGE> ').matches({
       user: null,
       text: null,
-      messageTypes: [MessageType.Image],
+      attachments: [Attachment.Image],
     })).to.be.true;
   });
   it('should match <CARDS> correctly', () => {
     expect(new Response(' <CARDS> ').matches({
       user: null,
       text: null,
-      messageTypes: [MessageType.Card],
+      attachments: [Attachment.Cards],
     })).to.be.true;
   });
   it('should match simple phrases correctly', () => {

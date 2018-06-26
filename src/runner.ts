@@ -1,7 +1,7 @@
 'use strict';
 import { Client } from './clients/client_interface';
 import { Dialogue } from './spec/dialogue';
-import { Message, MessageType } from './spec/message';
+import { Message, Attachment } from './spec/message';
 import { Response } from './spec/response';
 import { Turn, TurnType } from './spec/turn';
 import { Config } from './config';
@@ -156,7 +156,7 @@ export class Runner {
       if (response !== null) {
         if (program.verbose) {
           const timing = (new Date().getTime() - this.timing) || 0;
-          if (response.messageTypes.includes(MessageType.Text)) {
+          if (response.attachments.includes(Attachment.Text)) {
             const texts = response.text.split('\n');
             const truncatedText = texts.length > 5
               ? texts.slice(0, 5).join('\n') + '...' : response.text;
@@ -261,7 +261,7 @@ export class Runner {
         }
         this.client.send({
           user,
-          messageTypes: [MessageType.Text],
+          attachments: [Attachment.Text],
           text: next.query,
         });
       }
