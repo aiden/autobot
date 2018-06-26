@@ -16,7 +16,7 @@ concise, simple test files with strong flexibility and extensibility.
 - Parallel execution of tests
 - Test against multiple acceptable answers
 - Wildcard matching (`<NUMBER>`, `<WORD>`, `<*>`)
-- Support for testing rich attachments (`<IMAGE>`, `<CARDS>`)
+- Support for testing rich attachments (`<IMAGE>`, `<CARDS>`, `<OTHER>`)
 - Support for regular expressions (`<(st|nt|nd)>`)
 - Show diffs on error
 - Conversation branches
@@ -71,18 +71,38 @@ Dialogue:
           - Bot: <WORD>
 ```
 
+Handling multiple attachments
+
+```YAML
+Title: Conversation with rich messages
+Dialogue:
+  - Bot: Hi
+  - Human: Hello
+  - Human: How are we doing this month?
+  - Bot: "Month-to-date: <IMAGE> <CARDS>"
+  - Human: Show me ad spend compared to last month
+  - Bot: <IMAGE> <IMAGE>
+```
+
 ## Special Tags
 
-You can use the following tags in your test dialogue files:
+You can use the following tags anywhere in the bot’s response:
 
 Tag | Meaning
 --- | ---
 `<*>` | Matches anything, including whitespaces
 `<WORD>` | A single word without whitespaces
-`<IMAGE>` | An image attachment
-`<CARDS>` | A card attachment
 `<(REGEX)>` | Any regex expression, i.e. `<([0-9]{2})>`
 `<$VARNAME>` | An expression from the locale/translation file
+
+You can match one or more attachments **on their own, or at the end** of the
+response:
+
+Tag | Meaning
+--- | ---
+`<CARDS>` | Any card attachment
+`<IMAGE>` | Any image attachment
+`<OTHER>` | Any other type of attachment
 
 ## Install
 
