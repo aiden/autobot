@@ -192,12 +192,15 @@ export class Runner {
             expected = `\t\t${matchArray[0]}`;
           }
 
+          let actual = response.text ? [response.text] : [];
+          actual = actual.concat(response.attachments.map(a => `<${a}>`));
+
           this.results.set(test.dialogue, {
             dialogue: test.dialogue,
             passed: false,
             errorMessage: chalk.red(`\t${Runner.getUsername(test)}\n`) +
                           `\tExpected:\n${expected}` +
-                          `\n\tGot:\n\t\t${response.text}`,
+                          `\n\tGot:\n\t\t${actual.join(' ') || null}`,
           });
           this.terminateInstance(test);
           return;

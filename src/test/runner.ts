@@ -97,11 +97,15 @@ describe('runner.ts', () => {
       client,
       getDialoguePath('examples/'),
       Object.assign({}, defaultConfig, { timeout: 5 }));
-    expect(runner.dialogues).to.have.length(2);
+    expect(runner.dialogues).to.have.length(4);
     expect(runner.dialogues).to.deep.include(
       new Dialogue(getDialoguePath('examples/simple.yml')),
     ).and.to.deep.include(
       new Dialogue(getDialoguePath('examples/branching.yml')),
+    ).and.to.deep.include(
+      new Dialogue(getDialoguePath('examples/simple-attachment.yml')),
+    ).and.to.deep.include(
+      new Dialogue(getDialoguePath('examples/multiple-attachments.yml')),
     );
   });
 
@@ -118,7 +122,7 @@ describe('runner.ts', () => {
     });
   });
 
-  it('should fail a simple conversation if not matching', () => {
+  it('should fail a simple conversation if the text doesn\'t match', () => {
     const client = new MockClient();
     const runner = new Runner(client, getDialoguePath('examples/simple.yml'), defaultConfig);
     setTimeout(
@@ -146,6 +150,82 @@ describe('runner.ts', () => {
         .and.to.contain('Hi')
         .and.to.contain('Hello')
         .and.to.contain('Bye');
+    });
+  });
+
+  it('should fail a simple conversation if the attachment doesn\'t match', () => {
+    const client = new MockClient();
+    const runner = new Runner(client, getDialoguePath('examples/simple-attachment.yml'),
+      defaultConfig);
+    setTimeout(
+      () => {
+        const username = Runner.getUsername({
+          branchNumber: 0,
+          dialogue: new Dialogue(getDialoguePath('examples/simple-attachment.yml')),
+          lastMessage: 0,
+          terminated: false,
+        });
+
+        expect(client.read(username)).to.equal('Hello');
+        client.reply({
+          attachments: [],
+          text: 'Hi',
+          user: username,
+        });
+
+        expect(client.read(username)).to.equal('How is my campaign doing?');
+        client.reply({
+          attachments: [Attachment.Cards],
+          text: null,
+          user: username,
+        });
+      },
+      0);
+
+    return runner.start().then((results) => {
+      const testResult = results[0];
+      expect(testResult.passed).to.be.false;
+      expect(testResult.errorMessage)
+        .to.contain('Expected:\n\t\t<IMAGE>')
+        .and.to.contain('Got:\n\t\t<CARDS>');
+    });
+  });
+
+  it('should fail a conversation if attachment order doesn\'t match', () => {
+    const client = new MockClient();
+    const runner = new Runner(client, getDialoguePath('examples/multiple-attachments.yml'),
+      defaultConfig);
+    setTimeout(
+      () => {
+        const username = Runner.getUsername({
+          branchNumber: 0,
+          dialogue: new Dialogue(getDialoguePath('examples/multiple-attachments.yml')),
+          lastMessage: 0,
+          terminated: false,
+        });
+
+        expect(client.read(username)).to.equal('Hello');
+        client.reply({
+          attachments: [],
+          text: 'Hi',
+          user: username,
+        });
+
+        expect(client.read(username)).to.equal('How is my campaign doing?');
+        client.reply({
+          attachments: [Attachment.Cards, Attachment.Image],
+          text: 'Here are the stats for this week:',
+          user: username,
+        });
+      },
+      0);
+
+    return runner.start().then((results) => {
+      const testResult = results[0];
+      expect(testResult.passed).to.be.false;
+      expect(testResult.errorMessage)
+        .to.contain('Expected:\n\t\tHere are the stats for this week: <IMAGE> <CARDS>')
+        .and.to.contain('Got:\n\t\tHere are the stats for this week: <CARDS> <IMAGE>');
     });
   });
 

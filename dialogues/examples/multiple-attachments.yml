@@ -1,0 +1,6 @@
+Title: Multiple attachments
+Dialogue:
+  - Human: Hello
+  - Bot: Hi
+  - Human: How is my campaign doing?
+  - Bot: "Here are the stats for this week: <IMAGE> <CARDS>"
