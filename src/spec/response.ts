@@ -58,13 +58,16 @@ export class Response {
       return false;
     }
 
-    // Check that we have the same number, kind, and order of attachments.
-    // We can use JSON.stringify here since we know attachments is just a
-    // simple array of strings.
-
     // Check that we have the right number of attachments.
-    if (JSON.stringify(this.attachments) !== JSON.stringify(message.attachments)) {
+    if (this.attachments.length !== message.attachments.length) {
       return false;
+    }
+
+    // Check that we have the right types of attachments.
+    for (let i = 0; i < this.attachments.length; i += 1) {
+      if (this.attachments[i] !== message.attachments[i]) {
+        return false;
+      }
     }
 
     // Everything appears to be in order.
