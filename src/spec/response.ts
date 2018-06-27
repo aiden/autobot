@@ -7,12 +7,9 @@ const wordRegex: RegExp = /<WORD>/g;
 const numberRegex: RegExp = /<NUMBER>/g;
 const regexRegex: RegExp = /<\((.+?)\)>/g;
 
-// Matches an attachment wildcard (e.g. <IMAGE>) at the _end_ of responseData.
-//
-// The matched part is just the word in the brackets ('IMAGE'), which can be
-// directly compared against the Attachment enum (from which it was generated).
+// Use the Attachment enum values to create a regex for any attachment wildcard.
 const attachmentAlternatives = Object.values(Attachment).join('|');
-const attachmentsRegex = new RegExp(`\\s*<(${attachmentAlternatives})>$`);
+const attachmentsRegex = new RegExp(`<(?:${attachmentAlternatives})>`, 'g');
 
 export class Response {
   attachments: Attachment[];
@@ -21,39 +18,42 @@ export class Response {
   original: string;
 
   constructor(responseData: string) {
-    this.attachments = [];
     this.original = responseData.trim();
-    this.bodyText = this.original;
 
-    // Construct a list of attachments from the attachment wildcards at the
-    // end of the response data.  The end result is that `this.bodyText`
-    // contains only the body text and potentially some inline wildcards;
-    // and `this.attachments` contains a list of attachment types, in the
-    // same order as they originally were in the supplied data.
-    let match;
-    while ((match = this.bodyText.match(attachmentsRegex)) != null) {
-      this.attachments.push(match[1]);
-      this.bodyText = this.bodyText.slice(0, match.index);
-    }
-    this.attachments.reverse();
+    // Get a list of the Attachments in the response data.  The map removes the
+    // angle brackets so that the resulting elements are valid enum values.
+    this.attachments = (this.original.match(attachmentsRegex) || [])
+      .map(match => <Attachment>match.slice(1, -1));
 
-    // Construct a regex to match the remaining body text in terms of its
-    // inline wildcards.
+    // Get what's left of the body text once the attachment wildcards have been
+    // removed.  Each attachment consumes the surrounding whitespace, which in
+    // the end we replace with a single space.  This is done so that you can
+    // write e.g. '<IMAGE> <CARDS>' as a message spec and _not_ have the
+    // matcher try to match the message text with the space in between the
+    // wildcards in the spec.
+    //
+    // TODO: Use the array just after the map() to create an _array of match
+    //   checkers_ so that we can validate the interleaving of attachments and
+    //   message text, rather than ignoring where the attachments come within
+    //   the text.
+    this.bodyText = this.original  // 'Here you go: <IMAGE> and <CARDS>'
+      .split(attachmentsRegex)     // ['Here you go: ', ' and ', '']
+      .map(s => s.trim())          // ['Here you go:', 'and', '']
+      .filter(s => s)              // ['Here you go:', 'and']
+      .join(' ');                  // 'Here you go: and'
+
+    // Construct a regex to match the remaining body text.
     this.textMatchChecker = new RegExp(Response.transformTags(this.bodyText));
   }
 
   matches(message: Message): boolean {
 
-    // If we are expecting a message body, check that we have one...
-    if (this.bodyText && !message.text) {
+    // Check that the message body is present or absent, as expected.
+    if ((this.bodyText && !message.text) || (message.text && !this.bodyText)) {
       return false;
     }
 
-    // ...and check that the content is the same.
-    //
-    // Note that we ignore the message body altogether if the spec doesn't
-    // include one.  This is for backwards compatibility with when <IMAGE>
-    // and <CARDS> could only be used in place of the entire message.
+    // If there is a message body, check that its content is correct.
     if (this.bodyText && message.text.trim().match(this.textMatchChecker) === null) {
       return false;
     }

@@ -33,23 +33,19 @@ describe('response.ts', () => {
       attachments: [Attachment.Cards],
     })).to.be.true;
   });
-  it('should ignore text with <IMAGE> if no text is expected', () => {
-    // This is required for backwards compatibility with when <IMAGE>
-    // could only be used as the entire response.
+  it('should not match text with <IMAGE> if no text is expected', () => {
     expect(new Response(' <IMAGE> ').matches({
       user: null,
       text: ' Here is your image: ',
       attachments: [Attachment.Image],
-    })).to.be.true;
+    })).to.be.false;
   });
-  it('should ignore text with <CARDS> if no text is expected', () => {
-    // This is required for backwards compatibility with when <CARD>
-    // could only be used as the entire response.
+  it('should not match text with <CARDS> if no text is expected', () => {
     expect(new Response(' <CARDS> ').matches({
       user: null,
       text: ' Here are your options: ',
       attachments: [Attachment.Cards],
-    })).to.be.true;
+    })).to.be.false;
   });
   it('should match correct text with an attachment if text is expected', () => {
     expect(new Response('Here are your options: <CARDS>').matches({
@@ -62,6 +58,13 @@ describe('response.ts', () => {
     expect(new Response('Here are your options: <CARDS>').matches({
       user: null,
       text: 'choose from ',
+      attachments: [Attachment.Cards],
+    })).to.be.false;
+  });
+  it('should not match attachment without text if text is expected', () => {
+    expect(new Response('Here are your options: <CARDS>').matches({
+      user: null,
+      text: null,
       attachments: [Attachment.Cards],
     })).to.be.false;
   });
@@ -105,6 +108,20 @@ describe('response.ts', () => {
       user: null,
       text: null,
       attachments: [Attachment.Cards, Attachment.Image],
+    })).to.be.false;
+  });
+  it('should match multiple attachments within correct text', () => {
+    expect(new Response(' Compare <IMAGE> with <OTHER> ').matches({
+      user: null,
+      text: 'Compare with',
+      attachments: [Attachment.Image, Attachment.Other],
+    })).to.be.true;
+  });
+  it('should not match multiple attachments within incorrect text', () => {
+    expect(new Response(' <IMAGE> vs <OTHER> ').matches({
+      user: null,
+      text: 'Compare with',
+      attachments: [Attachment.Image, Attachment.Other],
     })).to.be.false;
   });
   it('should match simple phrases correctly', () => {
