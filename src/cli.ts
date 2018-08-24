@@ -34,7 +34,7 @@ program
     '(default current directory and parents)')
   .option('-np, --no-parallel', 'Disables parallelism')
   .option(
-     '-d, --domain <domain>',
+     '-d --dom <dom>',
      'DirectLine endpoint to use, alternative to https://directline.botframework.com/',
    )
   .arguments('<chatPath>')

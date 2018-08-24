@@ -59,8 +59,8 @@ export function getRunners(
 
 function createClient(config: Config): Client {
   if (config.client === ClientType.BotFramework) {
-    const domain = program.domain;
-    return new BotFrameworkClient(config.directLineSecret, domain);
+    const dom = program.dom;
+    return new BotFrameworkClient(config.directLineSecret, dom);
   } else {
     console.log('ERROR: unsupported client', config.client);
     process.exit(1);
