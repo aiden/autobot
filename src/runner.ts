@@ -1,7 +1,7 @@
 'use strict';
 import { Client } from './clients/client_interface';
 import { Dialogue } from './spec/dialogue';
-import { Message, MessageType } from './spec/message';
+import { Message, Attachment } from './spec/message';
 import { Response } from './spec/response';
 import { Turn, TurnType } from './spec/turn';
 import { Config } from './config';
@@ -156,12 +156,12 @@ export class Runner {
       if (response !== null) {
         if (program.verbose) {
           const timing = (new Date().getTime() - this.timing) || 0;
-          if (response.messageTypes.includes(MessageType.Text)) {
+          if (response.text) {
             const texts = response.text.split('\n');
             const truncatedText = texts.length > 5
               ? texts.slice(0, 5).join('\n') + '...' : response.text;
             console.log(chalk.blue('\tBOT', response.user, ':',
-              truncatedText),
+              truncatedText, ...response.attachments.map(a => `<${a}>`)),
               chalk.magenta(` (${timing}ms)`));
           } else {
             console.log(chalk.blue('\tBOT:', response.user, ':', JSON.stringify(response)),
@@ -192,12 +192,15 @@ export class Runner {
             expected = `\t\t${matchArray[0]}`;
           }
 
+          let actual = response.text ? [response.text] : [];
+          actual = actual.concat(response.attachments.map(a => `<${a}>`));
+
           this.results.set(test.dialogue, {
             dialogue: test.dialogue,
             passed: false,
             errorMessage: chalk.red(`\t${Runner.getUsername(test)}\n`) +
                           `\tExpected:\n${expected}` +
-                          `\n\tGot:\n\t\t${response.text}`,
+                          `\n\tGot:\n\t\t${actual.join(' ') || null}`,
           });
           this.terminateInstance(test);
           return;
@@ -261,7 +264,7 @@ export class Runner {
         }
         this.client.send({
           user,
-          messageTypes: [MessageType.Text],
+          attachments: [],
           text: next.query,
         });
       }

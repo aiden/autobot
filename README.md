@@ -16,7 +16,7 @@ concise, simple test files with strong flexibility and extensibility.
 - Parallel execution of tests
 - Test against multiple acceptable answers
 - Wildcard matching (`<NUMBER>`, `<WORD>`, `<*>`)
-- Support for testing rich attachments (`<IMAGE>`, `<CARDS>`)
+- Support for testing rich attachments (`<IMAGE>`, `<CARDS>`, `<OTHER>`)
 - Support for regular expressions (`<(st|nt|nd)>`)
 - Show diffs on error
 - Conversation branches
@@ -71,6 +71,28 @@ Dialogue:
           - Bot: <WORD>
 ```
 
+Handling multiple attachments
+
+```YAML
+Title: Conversation with rich messages
+Dialogue:
+  - Bot: Hi
+  - Human: Hello
+  - Human: How are we doing this month?
+  - Bot: "Month-to-date: <IMAGE> <CARDS>"
+  - Human: Show me ad spend compared to last month
+  - Bot: <IMAGE> <IMAGE>
+  - Human: How is the campaign doing overall?
+  - Bot: According to <IMAGE> and <IMAGE>, it's going great!
+```
+
+Currently, the order and type of the attachments are checked, as is the text
+that surrounds them, but not the position of the attachments within the text.
+
+> **NOTE**: In versions `0.0.11` and earlier, the text was not checked at all
+> when an attachment was present. If you were sending text along with the
+> attachment, you should add it to your dialogue when upgrading.
+
 ## Special Tags
 
 You can use the following tags in your test dialogue files:
@@ -80,7 +102,8 @@ Tag | Meaning
 `<*>` | Matches anything, including whitespaces
 `<WORD>` | A single word without whitespaces
 `<IMAGE>` | An image attachment
-`<CARDS>` | A card attachment
+`<CARDS>` | A card attachment (this includes buttons)
+`<OTHER>` | Any other type of attachment (video, etc.)
 `<(REGEX)>` | Any regex expression, i.e. `<([0-9]{2})>`
 `<$VARNAME>` | An expression from the locale/translation file
 

@@ -1,11 +1,11 @@
 import { expect } from 'chai';
 import { Response } from '../../spec/response';
-import { Message, MessageType } from '../../spec/message';
+import { Message, Attachment } from '../../spec/message';
 
 export function createTextMessage(text: string): Message {
   return {
     text,
-    messageTypes: [MessageType.Text],
+    attachments: [],
     user: null,
   };
 }
@@ -19,28 +19,110 @@ describe('response.ts', () => {
     expect(Response.transformTags('Hey <*>')).to.equal('^Hey ([\\s\\S]*?)$');
     expect(Response.transformTags('Hey <WORD> there')).to.equal('^Hey ([^ ]+?) there$');
   });
-  it('should instantiate <CARDS> correctly', () => {
-    expect(new Response(' <CARDS> ').responseType).to.equal(MessageType.Card);
-  });
-  it('should instantiate <IMAGE> correctly', () => {
-    expect(new Response(' <IMAGE> ').responseType).to.equal(MessageType.Image);
-  });
-  it('should match <CARDS> correctly', () => {
-    expect(new Response(' <CARDS> ').responseType).to.equal(MessageType.Card);
-  });
   it('should match <IMAGE> correctly', () => {
     expect(new Response(' <IMAGE> ').matches({
       user: null,
       text: null,
-      messageTypes: [MessageType.Image],
+      attachments: [Attachment.Image],
     })).to.be.true;
   });
   it('should match <CARDS> correctly', () => {
     expect(new Response(' <CARDS> ').matches({
       user: null,
       text: null,
-      messageTypes: [MessageType.Card],
+      attachments: [Attachment.Cards],
     })).to.be.true;
+  });
+  it('should not match text with <IMAGE> if no text is expected', () => {
+    expect(new Response(' <IMAGE> ').matches({
+      user: null,
+      text: ' Here is your image: ',
+      attachments: [Attachment.Image],
+    })).to.be.false;
+  });
+  it('should not match text with <CARDS> if no text is expected', () => {
+    expect(new Response(' <CARDS> ').matches({
+      user: null,
+      text: ' Here are your options: ',
+      attachments: [Attachment.Cards],
+    })).to.be.false;
+  });
+  it('should match correct text with an attachment if text is expected', () => {
+    expect(new Response('Here are your options: <CARDS>').matches({
+      user: null,
+      text: ' Here are your options: ',
+      attachments: [Attachment.Cards],
+    })).to.be.true;
+  });
+  it('should not match incorrect text with an attachment if text is expected', () => {
+    expect(new Response('Here are your options: <CARDS>').matches({
+      user: null,
+      text: 'choose from ',
+      attachments: [Attachment.Cards],
+    })).to.be.false;
+  });
+  it('should not match attachment without text if text is expected', () => {
+    expect(new Response('Here are your options: <CARDS>').matches({
+      user: null,
+      text: null,
+      attachments: [Attachment.Cards],
+    })).to.be.false;
+  });
+  it('should not match incorrect type of attachment', () => {
+    expect(new Response('<IMAGE>').matches({
+      user: null,
+      text: null,
+      attachments: [Attachment.Other],
+    })).to.be.false;
+  });
+  it('should not match a missing attachment', () => {
+    expect(new Response('Here you go: <IMAGE> ').matches({
+      user: null,
+      text: 'Here you go:',
+      attachments: [],
+    })).to.be.false;
+  });
+  it('should match multiple attachments', () => {
+    expect(new Response('Here you go:<IMAGE><IMAGE> ').matches({
+      user: null,
+      text: 'Here you go:',
+      attachments: [Attachment.Image, Attachment.Image],
+    })).to.be.true;
+  });
+  it('should not match the wrong number of attachments', () => {
+    expect(new Response('Here you go: <IMAGE> <IMAGE>').matches({
+      user: null,
+      text: 'Here you go:',
+      attachments: [Attachment.Image, Attachment.Image, Attachment.Image],
+    })).to.be.false;
+  });
+  it('should match different types of attachments', () => {
+    expect(new Response(' Here you go:  <IMAGE>  <CARDS> ').matches({
+      user: null,
+      text: 'Here you go:',
+      attachments: [Attachment.Image, Attachment.Cards],
+    })).to.be.true;
+  });
+  it('should not match the wrong order of attachments', () => {
+    expect(new Response(' <IMAGE> <CARDS>').matches({
+      user: null,
+      text: null,
+      attachments: [Attachment.Cards, Attachment.Image],
+    })).to.be.false;
+  });
+  it('should match multiple attachments within correct text', () => {
+    expect(new Response(' Compare <IMAGE> with <OTHER> ').matches({
+      user: null,
+      text: 'Compare with',
+      attachments: [Attachment.Image, Attachment.Other],
+    })).to.be.true;
+  });
+  it('should not match multiple attachments within incorrect text', () => {
+    expect(new Response(' <IMAGE> vs <OTHER> ').matches({
+      user: null,
+      text: 'Compare with',
+      attachments: [Attachment.Image, Attachment.Other],
+    })).to.be.false;
   });
   it('should match simple phrases correctly', () => {
     expect(new Response('Hello there!').matches(createTextMessage(' Hello there! ')))

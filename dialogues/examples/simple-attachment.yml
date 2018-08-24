@@ -1,0 +1,6 @@
+Title: Simple attachment
+Dialogue:
+  - Human: Hello
+  - Bot: Hi
+  - Human: How is my campaign doing?
+  - Bot: <IMAGE>
