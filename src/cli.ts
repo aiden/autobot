@@ -4,7 +4,6 @@
 import { Message } from './spec/message';
 import { Runner, TestResult } from './runner';
 import { getRunners } from './multi_runner';
-import { BotFrameworkClient } from './clients/botframework_client';
 import { Client } from './clients/client_interface';
 import { Config, defaultConfig, ClientType } from './config';
 import { Translator } from './translator';
@@ -34,6 +33,10 @@ program
   .option('-c, --config <autobot.yml>', 'autobot.yml config file to use ' + 
     '(default current directory and parents)')
   .option('-np, --no-parallel', 'Disables parallelism')
+  .option(
+     '-d, --domain <domain>',
+     'DirectLine endpoint to use, alternative to https://directline.botframework.com/',
+   )
   .arguments('<chatPath>')
   .action((chatPathVal) => {
     chatPath = chatPathVal;

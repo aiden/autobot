@@ -24,9 +24,9 @@ export class BotFrameworkClient extends Client {
   private onReadyCb: () => void;
   private historyIds: string[] = [];
 
-  constructor(directLineSecret: string) {
+  constructor(directLineSecret: string, domain?: string) {
     super();
-    this.directLine = new DirectLine({ secret: directLineSecret });
+    this.directLine = new DirectLine({ domain, secret: directLineSecret, webSocket: !domain });
     this.subscribeToConnectionStatus();
   }
 

@@ -14,7 +14,7 @@ import { updateSchema } from './pretty_printer';
 import * as fs from 'fs';
 import * as glob from 'glob';
 import * as path from 'path';
-// import * as program from 'commander';
+import * as program from 'commander';
 // import * as chalk from 'chalk';
 
 export function getRunners(
@@ -59,7 +59,8 @@ export function getRunners(
 
 function createClient(config: Config): Client {
   if (config.client === ClientType.BotFramework) {
-    return new BotFrameworkClient(config.directLineSecret);
+    const domain = program.domain;
+    return new BotFrameworkClient(config.directLineSecret, domain);
   } else {
     console.log('ERROR: unsupported client', config.client);
     process.exit(1);
